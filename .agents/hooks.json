@@ -1,0 +1,16 @@
+{
+  "saebom-guard": {
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./scripts/agents/guard-agy.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

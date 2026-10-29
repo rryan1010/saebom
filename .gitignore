@@ -1,0 +1,13 @@
+# Secrets never enter git (CLAUDE.md, Rules). Only .env.example files are committed.
+.env
+.env.*
+!.env.example
+
+# Agent sessions (docs/agent-workflow.md)
+.claude/worktrees/
+.claude/settings.local.json
+.agents/reviews/
+
+# Dependencies and system files
+node_modules/
+.DS_Store

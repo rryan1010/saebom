@@ -1,0 +1,41 @@
+name: Product question
+description: A product or preference question for the owner. Agents open these with the ask-owner skill (D61).
+title: 'Q: '
+labels: ['question']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Answer in a comment. The answer becomes a decision (a D-number in docs/HANDOFF.md §3) in the next pull request, which closes this issue when it merges.
+        The repo is public: no secrets, tester data or health data here.
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: One sentence the owner can answer in one line.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: The §14 item being built and why the spec doesn't settle it. Cite sections and D-numbers.
+    validations:
+      required: true
+  - type: textarea
+    id: options
+    attributes:
+      label: Options
+      description: Two or three, each with its trade-off. Mark the one you'd pick.
+    validations:
+      required: true
+  - type: textarea
+    id: default
+    attributes:
+      label: Default meanwhile
+      description: What the agent does until the owner answers, or "Blocked, parked".
+  - type: input
+    id: blocks
+    attributes:
+      label: Blocks
+      description: The branch or PR that waits on the answer.

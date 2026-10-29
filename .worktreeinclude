@@ -1,0 +1,4 @@
+# Git-ignored files that Claude Code copies into every worktree it creates (D60).
+# scripts/.env.local stays out on purpose: it holds the production secret key for the owner's invite script.
+app/.env.local
+supabase/functions/.env.local
