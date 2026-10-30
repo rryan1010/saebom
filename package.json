@@ -11,6 +11,7 @@
     "test:agents": "node --test \"scripts/agents/*.test.*\"",
     "db:types": "supabase gen types --lang=typescript --local > supabase/functions/_shared/database.types.ts && prettier --write supabase/functions/_shared/database.types.ts",
     "invite": "node --env-file=scripts/.env.local scripts/invite.ts",
+    "autopilot": "scripts/agents/autopilot.sh",
     "verify": "npm test && npm run test:db && npm run lint:db && npm run check:functions && npm --prefix app run typecheck && npm --prefix app run lint && npm run format:check && npm run test:agents"
   },
   "devDependencies": {
