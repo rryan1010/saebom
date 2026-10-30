@@ -15,6 +15,7 @@
     "verify": "npm test && npm run test:db && npm run lint:db && npm run check:functions && npm --prefix app run typecheck && npm --prefix app run lint && npm run format:check && npm run test:agents"
   },
   "devDependencies": {
+    "@types/node": "^24.19.2",
     "fast-check": "^4.10.2",
     "prettier": "3.9.10",
     "supabase": "2.122.0",
