@@ -9,7 +9,9 @@
 # what happens: merges, pull requests opened, second reviews posted, questions asked. It
 # never merges, pushes or touches production; it only opens the session you'd open by hand.
 #
-# Keys while it waits: Enter starts a task now, s shows the status, q quits.
+# Keys while it waits: Enter starts a task now (if no PR is open and no session is running),
+# f starts one anyway, s shows the status, q quits. Keys typed while it's busy are discarded,
+# and it never starts two tasks within 2 minutes.
 # AUTOPILOT_DRY_RUN=1 prints the session instead of opening it; AUTOPILOT_ONCE=1 checks once
 # and exits; AUTOPILOT_INTERVAL sets the seconds between checks (default 60). Works with the
 # bash that ships with macOS (3.2).
@@ -26,6 +28,9 @@ STATE="$MAIN/.git/autopilot" # inside .git, so it's never committed
 mkdir -p "$STATE"
 INTERVAL=${AUTOPILOT_INTERVAL:-60}
 SESSION_PATTERN='claude -w next-'
+COOLDOWN_S=120
+OPEN_PR_COUNT=0
+REASON=''
 
 PROMPT='/pstack:poteto-mode Take the next task from §14 of docs/HANDOFF.md: the first unchecked item that no open pull request covers. If that item is an owner-only step (CLAUDE.md, "Owner only"), skip it, name it in your final message, and take the next one. One task, one PR, then run the second-review skill. Stop when the PR is ready for my review.'
 
@@ -70,6 +75,33 @@ unchecked_items() {
 }
 
 session_running() { pgrep -f "$SESSION_PATTERN" >/dev/null 2>&1; }
+
+# Seconds since this autopilot last started a task (a large number if never).
+since_last_start() {
+  local last
+  last=$(cat "$STATE/last-start" 2>/dev/null)
+  echo $(($(date +%s) - ${last:-0}))
+}
+
+# Succeeds when a task may start now; otherwise sets REASON.
+can_start() {
+  if [ "$(since_last_start)" -lt "$COOLDOWN_S" ]; then
+    REASON='a task started less than 2 minutes ago'
+  elif [ "$OPEN_PR_COUNT" -gt 0 ]; then
+    REASON="$OPEN_PR_COUNT pull request(s) still open"
+  elif session_running; then
+    REASON='an autopilot session is still running'
+  else
+    return 0
+  fi
+  return 1
+}
+
+# Drops keys typed while the autopilot was busy, so stray typing can't start a task.
+flush_input() {
+  [ -t 0 ] && perl -MPOSIX -e 'POSIX::tcflush(0, POSIX::TCIFLUSH())' 2>/dev/null
+  return 0
+}
 
 # Wraps a value in single quotes for a shell script, keeping non-ASCII text readable.
 quote() { printf "'%s'" "$(printf '%s' "$1" | sed "s/'/'\\\\''/g")"; }
@@ -166,7 +198,6 @@ tick() {
   report_changes
   if [ -z "$last" ]; then
     echo "$head" >"$STATE/last-main"
-    log "Watching main at $(git log -1 --format='%h %s' origin/main). The next merge starts the next task."
     return
   fi
   [ "$head" = "$last" ] && return
@@ -178,26 +209,47 @@ tick() {
     notify "Every §14 item is ticked."
     exit 0
   fi
-  if [ "$OPEN_PR_COUNT" -gt 0 ]; then
-    log "Waiting: $OPEN_PR_COUNT pull request(s) still open. Merge or close them, or press Enter to start anyway."
-  elif session_running; then
-    log "Waiting: an autopilot session is still running. Press Enter to start another anyway."
-  else
+  if can_start; then
     start_task
+  else
+    log "Waiting: $REASON. Press f to start a task anyway."
   fi
 }
 
-log "Saebom autopilot. Enter: start a task now · s: status · q: quit"
+log 'Saebom autopilot.'
 git fetch -q origin main 2>/dev/null
 show_status
+log "Watching main at $(git log -1 --format='%h %s' origin/main 2>/dev/null)."
 tick
 [ -n "${AUTOPILOT_ONCE:-}" ] && exit 0
+log 'Waiting for your next merge. Enter: start a task now · s: status · q: quit'
+if [ -t 0 ]; then
+  stty -echo 2>/dev/null
+  trap 'stty echo 2>/dev/null' EXIT
+  trap 'exit 130' INT TERM
+fi
 while true; do
-  if read -r -s -n 1 -t "$INTERVAL" key; then
+  flush_input
+  if IFS= read -r -s -n 1 -t "$INTERVAL" key; then
     case "$key" in
-      q | Q) log "Autopilot stopped."; exit 0 ;;
+      q | Q) log 'Autopilot stopped.'; exit 0 ;;
       s | S) show_status ;;
-      '') start_task ;;
+      f | F)
+        if [ "$(since_last_start)" -lt "$COOLDOWN_S" ]; then
+          log 'Not starting: a task started less than 2 minutes ago.'
+        else
+          start_task
+        fi
+        ;;
+      '')
+        OPEN_PR_COUNT=$(open_prs | grep -c .)
+        if can_start; then
+          start_task
+        else
+          log "Not starting: $REASON. Press f to start a task anyway."
+        fi
+        ;;
+      *) continue ;;
     esac
   fi
   tick
