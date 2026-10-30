@@ -843,7 +843,7 @@ All items are open; build work hadn't started by Oct 28, the date of day 3. Days
 **Day 1 · Mon, Oct 26 · Foundations**
 
 - [x] Link `~/Development/saebom` to `rryan1010/saebom` (D57): remove the nested `app/.git` that `create-expo-app` may have made, make sure `app/.gitignore` ignores `/ios`, pull `main` (GitHub's README and LICENSE, plus `CLAUDE.md`, this handoff and the agent setup from the agent-workflow pull request), and push the first commit.
-- [ ] The rest of the §5 layout, including the npm scripts `CLAUDE.md` lists (`CLAUDE.md` and `docs/HANDOFF.md` arrive with the agent-workflow pull request). **App config done Oct 30** (routes in `app/app/`, the tsconfigs, ESLint with Prettier, Metro, EAS, `.env.example`); `docs/emergency-access.md` and `docs/incident-response.md` remain.
+- [x] The rest of the §5 layout, including the npm scripts `CLAUDE.md` lists (`CLAUDE.md` and `docs/HANDOFF.md` arrive with the agent-workflow pull request). **App config done Oct 30** (routes in `app/app/`, the tsconfigs, ESLint with Prettier, Metro, EAS, `.env.example`); `docs/emergency-access.md` and `docs/incident-response.md` done Oct 30.
 - [x] An Expo app (TypeScript, Expo Router) running in the Simulator and on the iPhone. **Done Oct 24.**
 - [x] The dark-first theme tokens. The accent color is a default until the owner answers #7.
 - [x] `supabase init` and `supabase start`; the first migration: all tables, RLS policies and grants (§6), and the `e1rm_by_week` view.
@@ -1035,6 +1035,7 @@ Saebom goes public as a free App Store app once the beta has run long enough to 
 - 45 CFR 164.312, Technical safeguards — https://www.ecfr.gov/current/title-45/subtitle-A/subchapter-C/part-164/subpart-C/section-164.312
 - HHS: HIPAA Security Rule NPRM fact sheet — https://www.hhs.gov/hipaa/for-professionals/security/hipaa-security-rule-nprm/factsheet/index.html
 - FTC: Health Breach Notification Rule, the Basics for Business — https://www.ftc.gov/business-guidance/resources/health-breach-notification-rule-basics-business
+- FTC: Complying with the FTC's Health Breach Notification Rule (checked Oct 30; the deadlines in `docs/incident-response.md`) — https://www.ftc.gov/business-guidance/resources/complying-ftcs-health-breach-notification-rule-0
 - Washington AG: My Health My Data Act guidance — https://www.atg.wa.gov/protecting-washingtonians-personal-health-data-and-privacy
 - GitHub Docs: Code scanning — https://docs.github.com/en/code-security/concepts/code-scanning/code-scanning
 - App name checks (Oct 15): App Store listings for "BestLift - Track Your Workouts" (https://chrome-stats.com/d/id1452048800), "Liftoff - Ranked Gym Workouts" (https://apps.apple.com/us/app/liftoff-ranked-gym-workouts/id6448081563) and "Kickoff Personal Training" (https://apps.apple.com/app/id1469977012) showed those names were taken; no app named Saebom turned up.
