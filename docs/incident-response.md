@@ -10,7 +10,7 @@ Treat any of these as an incident:
 - The app or a function shares tester data without the tester's consent. Examples are health data in an AI prompt, a notification, a log line, a public CI log, an issue or a pull request.
 - A secret leaks, even with no sign that anyone used it. Treat it as a possible breach until the logs show otherwise.
 
-Tester data here means the email together with anything from `profiles`, the training tables, `consents` or `audit_events`. The FTC counts health data as unsecured unless it was encrypted in the way HHS specifies. Treat a leak of production data as unsecured. An encrypted backup that leaks without its age private key is secured.
+Tester data here means anything from `profiles`, the training tables, `consents` or `audit_events`, with or without the email. The testers are a small group of friends and family, so a user ID or a few rows can be enough to tell who someone is. The FTC counts health data as unsecured unless it was encrypted in the way HHS specifies. Treat a leak of production data as unsecured. An encrypted backup that leaks without its age private key is secured.
 
 Supabase, Cloudflare, GitHub and Apple are service providers. If one of them tells you about a breach on their side, start at step 1 below.
 
@@ -47,7 +47,7 @@ The beta has friends and family only, so the first two rows are the ones that ap
 - what kinds of data were involved;
 - what the tester can do to protect themselves;
 - what you are doing to investigate, to limit the harm and to stop it happening again;
-- at least two ways to reach you, such as email and a phone number.
+- at least two ways to reach you from the FTC's list: an email address, a postal address, a website, the app itself or a toll-free phone number.
 
 Some states' breach laws may also cover health data. Check the affected testers' states before you send.
 
