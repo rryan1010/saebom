@@ -51,6 +51,34 @@ Do this once, in order. It takes about 45 minutes.
 
 A second session can run at the same time when its task touches different files, such as tests or docs while the first builds a screen. On Claude Pro, two sessions at once is the ceiling (D60).
 
+## Autopilot: the next task starts when you merge (D67)
+
+The autopilot runs steps 1–3 of the loop for you. You keep reviewing and merging, and the next task starts about a minute after each merge.
+
+1. **Start it** in its own Terminal window, from your main checkout:
+
+   ```bash
+   cd ~/Development/saebom && git switch main
+   npm run autopilot
+   ```
+
+2. **Leave that window open.** Every minute it checks GitHub. When `main` gets a new commit (your merge), no pull request is open and no session it started is still running, it updates your main checkout and opens a new Terminal window running `claude -w next-<date-time>` with the next-task prompt. That session works like one you started by hand: you can watch it and answer its prompts, and the guard and second review still apply.
+3. **Follow along in its log.** It prints a timestamped line, and shows a Mac notification, when:
+   - a pull request opens;
+   - a second review is posted, which means the PR is ready for your review;
+   - a question issue needs your answer;
+   - `main` moves after a merge;
+   - it starts a task, or why it's waiting instead (a PR still open, or a session still running).
+4. **Use the keys** in its window: **Enter** starts a task now, **s** shows the status, **q** quits. It also stops when every §14 item is ticked.
+
+What to know:
+
+- **It never merges, pushes or touches production.** It only opens the session you'd open by hand, and your production steps after a merge stay yours.
+- **If the Mac sleeps, it pauses** and catches up when the Mac wakes. A merge made while it was stopped starts a task the next time you run it.
+- **It uses your Claude Pro limits faster,** since nothing waits between tasks. When a session hits the limit, finish that task in Antigravity as usual (see below); the autopilot waits until that PR is merged.
+- **The first notification** may ask you to allow notifications for Script Editor, which macOS uses to show them. Allow them in System Settings → Notifications if you want the banners.
+- **To try it without opening sessions,** run `AUTOPILOT_DRY_RUN=1 npm run autopilot`: it prints the session it would open instead.
+
 ## Questions and decisions
 
 - **A question arrives** as a GitHub issue labeled `question`, laid out as Question, Context, Options, Default meanwhile and Blocks. The agent has already marked the option it would pick.

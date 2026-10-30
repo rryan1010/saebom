@@ -176,6 +176,7 @@ gh issue create --label question --title "Q: <question>" --body-file <file>   # 
 Owner only, never an agent:
 
 ```bash
+npm run autopilot                              # scripts/agents/autopilot.sh: opens the next task's session after each merge (D67)
 npm run invite -- friend@example.com           # node --env-file=scripts/.env.local scripts/invite.ts
 npm run invite -- --reset friend@example.com   # one-time code for a password reset
 npx supabase db push --dry-run                 # then: npx supabase db push
