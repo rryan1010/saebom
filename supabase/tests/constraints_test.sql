@@ -1,5 +1,5 @@
 begin;
-select plan(30);
+select plan(31);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-00000000000a', 'a@example.com'),
@@ -137,7 +137,7 @@ select throws_ok(
 -- e1rm_by_week
 insert into public.set_logs (user_id, session_id, exercise_slug, set_index, weight_lb, reps) values
   ('00000000-0000-0000-0000-00000000000a', 1, 'goblet_squat', 0, 100, 10),
-  ('00000000-0000-0000-0000-00000000000a', 1, 'goblet_squat', 1, 90, 13),
+  ('00000000-0000-0000-0000-00000000000a', 1, 'goblet_squat', 1, 120, 13),
   ('00000000-0000-0000-0000-00000000000a', 2, 'goblet_squat', 0, 130, 1);
 
 select is(
@@ -157,16 +157,46 @@ select is(
 );
 
 -- Account deletion cascades to every row; the audit trail survives it.
+insert into public.consents (user_id, kind, policy_version, granted) values
+  ('00000000-0000-0000-0000-00000000000a', 'data', '1', true);
+insert into public.rep_records (user_id, exercise_slug, weight_lb, best_reps, achieved_at) values
+  ('00000000-0000-0000-0000-00000000000a', 'goblet_squat', 130, 1, now());
+insert into public.next_targets (user_id, exercise_slug, target_weight_lb, rep_min, rep_max, rir) values
+  ('00000000-0000-0000-0000-00000000000a', 'goblet_squat', 100, 8, 10, 3);
+insert into public.lighter_weeks (user_id, week_start, source) values
+  ('00000000-0000-0000-0000-00000000000a', '2026-11-02', 'rules');
+insert into public.coach_suggestions (user_id, week_start, changes) values
+  ('00000000-0000-0000-0000-00000000000a', '2026-11-02', '[]');
 insert into public.audit_events (actor, action) values
   ('00000000-0000-0000-0000-00000000000a', 'account_deleted');
+
+select ok(
+  exists (select 1 from public.profiles where id = '00000000-0000-0000-0000-00000000000a')
+  and exists (select 1 from public.consents where user_id = '00000000-0000-0000-0000-00000000000a')
+  and exists (select 1 from public.plans where user_id = '00000000-0000-0000-0000-00000000000a')
+  and exists (select 1 from public.plan_items where user_id = '00000000-0000-0000-0000-00000000000a')
+  and exists (select 1 from public.workout_sessions where user_id = '00000000-0000-0000-0000-00000000000a')
+  and exists (select 1 from public.set_logs where user_id = '00000000-0000-0000-0000-00000000000a')
+  and exists (select 1 from public.rep_records where user_id = '00000000-0000-0000-0000-00000000000a')
+  and exists (select 1 from public.next_targets where user_id = '00000000-0000-0000-0000-00000000000a')
+  and exists (select 1 from public.lighter_weeks where user_id = '00000000-0000-0000-0000-00000000000a')
+  and exists (select 1 from public.coach_suggestions where user_id = '00000000-0000-0000-0000-00000000000a'),
+  'user A has a row in every user table before deletion'
+);
+
 delete from auth.users where id = '00000000-0000-0000-0000-00000000000a';
 
 select is(
   (select count(*) from public.profiles where id = '00000000-0000-0000-0000-00000000000a')
+  + (select count(*) from public.consents where user_id = '00000000-0000-0000-0000-00000000000a')
   + (select count(*) from public.plans where user_id = '00000000-0000-0000-0000-00000000000a')
   + (select count(*) from public.plan_items where user_id = '00000000-0000-0000-0000-00000000000a')
   + (select count(*) from public.workout_sessions where user_id = '00000000-0000-0000-0000-00000000000a')
-  + (select count(*) from public.set_logs where user_id = '00000000-0000-0000-0000-00000000000a'),
+  + (select count(*) from public.set_logs where user_id = '00000000-0000-0000-0000-00000000000a')
+  + (select count(*) from public.rep_records where user_id = '00000000-0000-0000-0000-00000000000a')
+  + (select count(*) from public.next_targets where user_id = '00000000-0000-0000-0000-00000000000a')
+  + (select count(*) from public.lighter_weeks where user_id = '00000000-0000-0000-0000-00000000000a')
+  + (select count(*) from public.coach_suggestions where user_id = '00000000-0000-0000-0000-00000000000a'),
   0::bigint,
   'deleting a user removes all of their rows'
 );

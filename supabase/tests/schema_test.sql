@@ -29,18 +29,36 @@ select ok(
   'e1rm_by_week runs with the caller''s RLS'
 );
 
+-- Effective privileges, so grants to PUBLIC, column grants and sequences count too.
+create temporary view app_privileges as
+select r.role, c.relname::text as relation, p.priv
+from pg_class c
+join pg_namespace n on n.oid = c.relnamespace
+cross join (values ('anon'), ('authenticated')) as r (role)
+cross join (values
+  ('SELECT'), ('INSERT'), ('UPDATE'), ('DELETE'), ('TRUNCATE'), ('REFERENCES'), ('TRIGGER'), ('USAGE')
+) as p (priv)
+where n.nspname = 'public'
+  and c.relkind in ('r', 'p', 'v', 'm', 'f', 'S')
+  and case
+    when c.relkind = 'S' then
+      p.priv in ('SELECT', 'UPDATE', 'USAGE') and has_sequence_privilege(r.role, c.oid, p.priv)
+    when p.priv in ('SELECT', 'INSERT', 'UPDATE', 'REFERENCES') then
+      has_any_column_privilege(r.role, c.oid, p.priv)
+    when p.priv in ('DELETE', 'TRUNCATE', 'TRIGGER') then
+      has_table_privilege(r.role, c.oid, p.priv)
+    else false
+  end;
+
 select is(
-  (select array_agg(distinct table_name::text order by table_name::text)
-   from information_schema.role_table_grants
-   where table_schema = 'public' and grantee = 'anon'),
+  (select array_agg(relation || ':' || priv) from app_privileges where role = 'anon'),
   null,
-  'anon has no privileges on any public table or view'
+  'anon has no privileges on any public table, view or sequence'
 );
 
 select is(
-  (select array_agg(table_name || ':' || privilege_type order by table_name, privilege_type)
-   from information_schema.role_table_grants
-   where table_schema = 'public' and grantee = 'authenticated'),
+  (select array_agg(relation || ':' || priv order by relation, priv)
+   from app_privileges where role = 'authenticated'),
   array[
     'audit_events:SELECT',
     'coach_suggestions:SELECT',
@@ -60,10 +78,8 @@ select is(
 );
 
 select is(
-  (select array_agg(distinct table_name::text order by table_name::text)
-   from information_schema.role_table_grants
-   where table_schema = 'public' and grantee = 'authenticated'
-     and table_name in ('invites', 'ai_usage')),
+  (select array_agg(relation || ':' || priv) from app_privileges
+   where role = 'authenticated' and relation in ('invites', 'ai_usage')),
   null,
   'authenticated has nothing on invites or ai_usage'
 );
