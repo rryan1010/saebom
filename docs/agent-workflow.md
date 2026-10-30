@@ -23,6 +23,7 @@ Do this once, in order. It takes about 45 minutes.
    - `supabase/functions/.env.local`, with the local function secrets.
 
    `.worktreeinclude` copies both into every agent worktree. `scripts/.env.local` stays in your main checkout only, because it holds the production secret key (D60).
+
 4. **Start Claude Code** in `~/Development/saebom` and accept the trust prompt. Claude Code then registers the `cursor-plugins` marketplace and loads pstack. Run `/plugin` to confirm pstack is listed; if it isn't, run `/reload-plugins` or start a new session. Then run `/context` and check that `.claude/rules/pstack-models.md` is loaded. Don't run `/pstack:setup-pstack`: that project rule replaces it.
 5. **Smoke-test the guard in Claude Code.** Ask Claude to run each of these, and expect a refusal:
    - `git push origin main --dry-run`, which a deny rule blocks;
@@ -75,44 +76,44 @@ Claude Pro's five-hour and weekly limits are shared with claude.ai, and agent se
 
 ## Models and effort
 
-| Role | Model | Effort |
-|---|---|---|
-| Main Claude session | Opus 5.5 (Claude Code's default on Pro) | high; medium when limits are tight |
-| pstack code delegates | Sonnet 5.5 (`.claude/rules/pstack-models.md`) | high |
-| pstack judgment and reviews | Opus 5.5 | high |
-| Gemini, second review and fallback | Gemini 4 Argon | high |
+| Role                               | Model                                         | Effort                             |
+| ---------------------------------- | --------------------------------------------- | ---------------------------------- |
+| Main Claude session                | Opus 5.5 (Claude Code's default on Pro)       | high; medium when limits are tight |
+| pstack code delegates              | Sonnet 5.5 (`.claude/rules/pstack-models.md`) | high                               |
+| pstack judgment and reviews        | Opus 5.5                                      | high                               |
+| Gemini, second review and fallback | Gemini 4 Argon                                | high                               |
 
 Effort never goes below medium (D64), and the guard refuses subagents at `low`. Fable isn't used, because it bills to usage credits on Pro.
 
 ## What enforces each rule
 
-| Rule (`CLAUDE.md`) | Enforced by |
-|---|---|
-| No pushes to `main`, no force-pushes | Guard hook and deny rules; the ruleset on `main` on GitHub's side |
-| No merges or approvals by agents | Guard hook and deny rules; you merge |
-| No production or account commands (`db push`, `functions deploy`, `link`, `secrets`, `--linked`, invites, EAS) | Guard hook and deny rules |
-| No secret files (`.env.local`, `scripts/.env.local`, signing keys) | Guard hook and `Read` deny rules; `.gitignore`; GitHub secret scanning (day 9) |
-| No hook bypasses (`--no-verify`, `core.hooksPath`) | Guard hook and deny rules |
-| No unguarded agents (bypass mode, `--dangerously-skip-permissions`) | `disableBypassPermissionsMode`; the guard hook |
-| Agents don't edit the guardrails | Guard hook and `Edit` deny rules; you review any change to them |
-| Effort at medium or above; no Fable | Guard hook, for subagents |
-| Tests, RLS, accessibility and no health data in logs | Tests, CI and your review, with the second review's help |
+| Rule (`CLAUDE.md`)                                                                                             | Enforced by                                                                    |
+| -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| No pushes to `main`, no force-pushes                                                                           | Guard hook and deny rules; the ruleset on `main` on GitHub's side              |
+| No merges or approvals by agents                                                                               | Guard hook and deny rules; you merge                                           |
+| No production or account commands (`db push`, `functions deploy`, `link`, `secrets`, `--linked`, invites, EAS) | Guard hook and deny rules                                                      |
+| No secret files (`.env.local`, `scripts/.env.local`, signing keys)                                             | Guard hook and `Read` deny rules; `.gitignore`; GitHub secret scanning (day 9) |
+| No hook bypasses (`--no-verify`, `core.hooksPath`)                                                             | Guard hook and deny rules                                                      |
+| No unguarded agents (bypass mode, `--dangerously-skip-permissions`)                                            | `disableBypassPermissionsMode`; the guard hook                                 |
+| Agents don't edit the guardrails                                                                               | Guard hook and `Edit` deny rules; you review any change to them                |
+| Effort at medium or above; no Fable                                                                            | Guard hook, for subagents                                                      |
+| Tests, RLS, accessibility and no health data in logs                                                           | Tests, CI and your review, with the second review's help                       |
 
 The guard reads command text, so it can't see inside script files or interpreters (`bash x.sh`, `node -e`), or files a program opens without naming them. The deny rules, the ruleset and your review cover those.
 
 ## Troubleshooting
 
-| Symptom | Cause | Fix |
-|---|---|---|
-| The low-effort subagent test runs instead of being refused | Claude Code couldn't start `node` for the hook | Run `which node` in the terminal you start `claude` from; if it's empty, run `nvm use` there or set an nvm default (`nvm alias default 24`) |
-| Every Antigravity tool call fails with "pre-tool hook failed" | The hook couldn't run `scripts/agents/guard-agy.sh` | Start `agy` from the repo root, and check that the script is executable (`chmod +x scripts/agents/guard-agy.sh`) |
-| Antigravity refuses everything with "Node.js was not found" | Antigravity's trimmed environment has no `node`, and the launcher didn't find one in nvm or Homebrew | Install Node 24 through nvm (`~/.nvm/versions/node/v24…`) or Homebrew |
-| The second-review comment says "Model used: Gemini 3.8 Flash" | Antigravity didn't recognize the model id (issue #1228) | Run `agy models` and set `GEMINI_REVIEW_MODEL` to Argon's id |
-| `gemini-review.ts` exits 3 with "signed out" | Antigravity's cached sign-in expired | Run `agy` once and sign in again |
-| `gemini-review.ts` exits 2 | The diff looks like it holds a secret; nothing was sent | Take the secret out of the branch, and rotate it if it was ever pushed |
-| A worktree has no `.env.local` files | They didn't exist in the main checkout when the worktree was created | Create them in the main checkout (setup step 3), then start a new worktree |
-| `/plugin` shows pstack as "enabled in project settings but isn't installed here" | The marketplace hasn't registered yet | Accept the trust prompt, then run `/reload-plugins`; or run `/plugin marketplace add cursor/plugins` and `/plugin install pstack@cursor-plugins` |
-| An agent says the guard blocked a step it needs | The step is yours by design | Run it yourself; if the guard is wrong, edit it by hand and open a PR with a test |
+| Symptom                                                                          | Cause                                                                                                | Fix                                                                                                                                              |
+| -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| The low-effort subagent test runs instead of being refused                       | Claude Code couldn't start `node` for the hook                                                       | Run `which node` in the terminal you start `claude` from; if it's empty, run `nvm use` there or set an nvm default (`nvm alias default 24`)      |
+| Every Antigravity tool call fails with "pre-tool hook failed"                    | The hook couldn't run `scripts/agents/guard-agy.sh`                                                  | Start `agy` from the repo root, and check that the script is executable (`chmod +x scripts/agents/guard-agy.sh`)                                 |
+| Antigravity refuses everything with "Node.js was not found"                      | Antigravity's trimmed environment has no `node`, and the launcher didn't find one in nvm or Homebrew | Install Node 24 through nvm (`~/.nvm/versions/node/v24…`) or Homebrew                                                                            |
+| The second-review comment says "Model used: Gemini 3.8 Flash"                    | Antigravity didn't recognize the model id (issue #1228)                                              | Run `agy models` and set `GEMINI_REVIEW_MODEL` to Argon's id                                                                                     |
+| `gemini-review.ts` exits 3 with "signed out"                                     | Antigravity's cached sign-in expired                                                                 | Run `agy` once and sign in again                                                                                                                 |
+| `gemini-review.ts` exits 2                                                       | The diff looks like it holds a secret; nothing was sent                                              | Take the secret out of the branch, and rotate it if it was ever pushed                                                                           |
+| A worktree has no `.env.local` files                                             | They didn't exist in the main checkout when the worktree was created                                 | Create them in the main checkout (setup step 3), then start a new worktree                                                                       |
+| `/plugin` shows pstack as "enabled in project settings but isn't installed here" | The marketplace hasn't registered yet                                                                | Accept the trust prompt, then run `/reload-plugins`; or run `/plugin marketplace add cursor/plugins` and `/plugin install pstack@cursor-plugins` |
+| An agent says the guard blocked a step it needs                                  | The step is yours by design                                                                          | Run it yourself; if the guard is wrong, edit it by hand and open a PR with a test                                                                |
 
 ## Noodle, after Nov 6
 

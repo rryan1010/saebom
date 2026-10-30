@@ -34,6 +34,7 @@ Read the `Agent:` line in the PR body.
    ```
 
    When the review found nothing, write `No findings.` after the first line.
+
 5. Run the review again only if later commits change behavior beyond the fixes.
 
 Never put secrets, tester data or `.env` contents in a review prompt or comment.
