@@ -1,5 +1,5 @@
 begin;
-select plan(31);
+select plan(34);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-00000000000a', 'a@example.com'),
@@ -15,12 +15,16 @@ insert into public.plans (id, user_id, version, source, status) overriding syste
   (2, '00000000-0000-0000-0000-00000000000b', 1, 'rules', 'active');
 
 insert into public.workout_sessions
-  (id, user_id, client_id, plan_id, day_label, started_at, ended_at, duration_s)
+  (id, user_id, client_id, plan_id, day_label, started_at, ended_at, duration_s, utc_offset_min)
 overriding system value values
   (1, '00000000-0000-0000-0000-00000000000a', gen_random_uuid(), 1, 'A',
-   '2026-10-27 17:00+00', '2026-10-27 17:45+00', 2700),
+   '2026-10-27 17:00+00', '2026-10-27 17:45+00', 2700, -420),
   (2, '00000000-0000-0000-0000-00000000000a', gen_random_uuid(), 1, 'B',
-   '2026-10-29 17:00+00', '2026-10-29 17:45+00', 2700);
+   '2026-10-29 17:00+00', '2026-10-29 17:45+00', 2700, -420),
+  (3, '00000000-0000-0000-0000-00000000000a', gen_random_uuid(), 1, 'C',
+   '2026-11-02 03:00+00', '2026-11-02 03:45+00', 2700, -480),
+  (4, '00000000-0000-0000-0000-00000000000a', gen_random_uuid(), 1, 'A',
+   '2026-11-02 03:00+00', '2026-11-02 03:45+00', 2700, 0);
 
 -- profiles
 select throws_ok(
@@ -102,9 +106,9 @@ select throws_ok(
 
 -- sessions, plans, consents, invites, coach suggestions, exercises
 select throws_ok(
-  $$insert into public.workout_sessions (user_id, client_id, plan_id, day_label, started_at, ended_at, duration_s)
+  $$insert into public.workout_sessions (user_id, client_id, plan_id, day_label, started_at, ended_at, duration_s, utc_offset_min)
     values ('00000000-0000-0000-0000-00000000000a', gen_random_uuid(), 1, 'A',
-            '2026-10-27 18:00+00', '2026-10-27 17:00+00', 0)$$,
+            '2026-10-27 18:00+00', '2026-10-27 17:00+00', 0, -420)$$,
   '23514', null, 'a session starts before it ends');
 select throws_ok(
   $$insert into public.plans (user_id, version, source, status)
@@ -155,6 +159,30 @@ select is(
   130.0,
   'a single rep counts as its own weight'
 );
+
+-- Sessions 3 and 4 both start Monday Nov 2 at 03:00 UTC: Sunday evening in Pacific time
+-- for session 3, Monday for session 4 (D66).
+insert into public.set_logs (user_id, session_id, exercise_slug, set_index, weight_lb, reps) values
+  ('00000000-0000-0000-0000-00000000000a', 3, 'goblet_squat', 0, 200, 1),
+  ('00000000-0000-0000-0000-00000000000a', 4, 'goblet_squat', 0, 50, 1);
+
+select is(
+  (select e1rm_lb from public.e1rm_by_week
+   where user_id = '00000000-0000-0000-0000-00000000000a' and week_start = '2026-10-26'),
+  200.0,
+  'a Sunday-evening session counts toward the local week, not the UTC week'
+);
+select is(
+  (select e1rm_lb from public.e1rm_by_week
+   where user_id = '00000000-0000-0000-0000-00000000000a' and week_start = '2026-11-02'),
+  50.0,
+  'the same instant at UTC+0 counts toward the next week'
+);
+select throws_ok(
+  $$insert into public.workout_sessions (user_id, client_id, plan_id, day_label, started_at, ended_at, duration_s, utc_offset_min)
+    values ('00000000-0000-0000-0000-00000000000a', gen_random_uuid(), 1, 'A',
+            '2026-10-27 17:00+00', '2026-10-27 17:45+00', 2700, 900)$$,
+  '23514', null, 'a UTC offset stays within -12:00 and +14:00');
 
 -- Account deletion cascades to every row; the audit trail survives it.
 insert into public.consents (user_id, kind, policy_version, granted) values

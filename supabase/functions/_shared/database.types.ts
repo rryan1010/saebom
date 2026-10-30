@@ -473,6 +473,7 @@ export type Database = {
           plan_id: number;
           started_at: string;
           user_id: string;
+          utc_offset_min: number;
           went_lighter: boolean;
         };
         ComputedFields: never;
@@ -485,6 +486,7 @@ export type Database = {
           plan_id: number;
           started_at: string;
           user_id: string;
+          utc_offset_min: number;
           went_lighter?: boolean;
         };
         Update: {
@@ -496,6 +498,7 @@ export type Database = {
           plan_id?: number;
           started_at?: string;
           user_id?: string;
+          utc_offset_min?: number;
           went_lighter?: boolean;
         };
         Relationships: [

@@ -38,10 +38,10 @@ insert into public.plan_items (plan_id, user_id, day_label, position, exercise_s
 select id, user_id, 'A', 1, 'goblet_squat', 2, 8, 10, 3 from public.plans;
 
 insert into public.workout_sessions
-  (id, user_id, client_id, plan_id, day_label, started_at, ended_at, duration_s)
+  (id, user_id, client_id, plan_id, day_label, started_at, ended_at, duration_s, utc_offset_min)
 overriding system value
 select id, user_id, gen_random_uuid(), id, 'A',
-  '2026-10-27 17:00+00', '2026-10-27 17:45+00', 2700
+  '2026-10-27 17:00+00', '2026-10-27 17:45+00', 2700, -420
 from public.plans;
 
 insert into public.set_logs (user_id, session_id, exercise_slug, set_index, weight_lb, reps, effort)

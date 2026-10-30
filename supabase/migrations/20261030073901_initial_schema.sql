@@ -123,6 +123,7 @@ create table public.workout_sessions (
   started_at timestamptz not null,
   ended_at timestamptz not null,
   duration_s integer not null check (duration_s >= 0),
+  utc_offset_min smallint not null check (utc_offset_min between -720 and 840),
   went_lighter boolean not null default false,
   foreign key (plan_id, user_id) references public.plans (id, user_id),
   unique (user_id, client_id),
@@ -205,18 +206,27 @@ create table public.ai_usage (
 );
 
 -- Epley over sets of 12 reps or fewer; a single rep counts as its own weight.
+-- Weeks run Monday to Sunday in the tester's local time when the session started (D66).
 create view public.e1rm_by_week with (security_invoker = true) as
 select
   s.user_id,
   s.exercise_slug,
-  date_trunc('week', w.started_at at time zone 'UTC')::date as week_start,
+  w.local_week_start as week_start,
   max(
     case when s.reps = 1 then s.weight_lb else round(s.weight_lb * (1 + s.reps / 30.0), 1) end
   ) as e1rm_lb
 from public.set_logs s
-join public.workout_sessions w on w.id = s.session_id and w.user_id = s.user_id
+join (
+  select
+    id,
+    user_id,
+    date_trunc(
+      'week', (started_at at time zone 'UTC') + make_interval(mins => utc_offset_min)
+    )::date as local_week_start
+  from public.workout_sessions
+) w on w.id = s.session_id and w.user_id = s.user_id
 where s.reps <= 12
-group by s.user_id, s.exercise_slug, date_trunc('week', w.started_at at time zone 'UTC');
+group by s.user_id, s.exercise_slug, w.local_week_start;
 
 alter table public.profiles enable row level security;
 alter table public.consents enable row level security;
