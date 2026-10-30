@@ -32,3 +32,7 @@ export const TYPE = {
 export const SPACE = { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 } as const;
 
 export const MOTION = { durationMs: 250 } as const;
+
+export function schemeFor(systemScheme: string | null | undefined): Scheme {
+  return systemScheme === 'light' ? 'light' : 'dark';
+}

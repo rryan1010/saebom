@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { COLORS, MOTION, type ColorRole, type Scheme } from './theme.ts';
+import { COLORS, MOTION, schemeFor, type ColorRole, type Scheme } from './theme.ts';
 
 function channel(hex: string, start: number): number {
   const c = parseInt(hex.slice(start, start + 2), 16) / 255;
@@ -29,9 +29,25 @@ const PAIRS: { fg: ColorRole; bg: ColorRole; min: number }[] = [
 const SCHEMES: Scheme[] = ['dark', 'light'];
 
 describe.each(SCHEMES)('%s theme contrast', (scheme) => {
+  it('uses opaque #RRGGBB colors, which the contrast math assumes', () => {
+    for (const hex of Object.values(COLORS[scheme])) expect(hex).toMatch(/^#[0-9A-F]{6}$/i);
+  });
+
   it.each(PAIRS)('$fg on $bg is at least $min:1', ({ fg, bg, min }) => {
     const ratio = contrast(COLORS[scheme][fg], COLORS[scheme][bg]);
     expect(ratio, `${scheme}: ${fg} on ${bg}`).toBeGreaterThanOrEqual(min);
+  });
+});
+
+describe('schemeFor', () => {
+  it.each([
+    ['light', 'light'],
+    ['dark', 'dark'],
+    ['unspecified', 'dark'],
+    [null, 'dark'],
+    [undefined, 'dark'],
+  ] as const)('maps the system scheme %s to %s (dark first)', (system, expected) => {
+    expect(schemeFor(system)).toBe(expected);
   });
 });
 
