@@ -1,17 +1,20 @@
-import { Text, useColorScheme, View } from 'react-native';
+import { Text, View } from 'react-native';
+
+import { TYPE } from '@/ui/theme';
+import { useTheme } from '@/ui/useTheme';
 
 export default function Index() {
-  const dark = useColorScheme() === 'dark';
+  const { colors } = useTheme();
   return (
     <View
       style={{
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: dark ? '#000' : '#fff',
+        backgroundColor: colors.background,
       }}
     >
-      <Text accessibilityRole="header" style={{ fontSize: 32, color: dark ? '#fff' : '#000' }}>
+      <Text accessibilityRole="header" style={[TYPE.largeTitle, { color: colors.text }]}>
         Saebom
       </Text>
     </View>
