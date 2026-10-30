@@ -2,3 +2,6 @@ app/ios/
 app/.expo/
 # pstack reads these files in its own line format
 .claude/rules/
+# Claude Code rewrites these in its own JSON layout
+.claude/settings.json
+.claude/settings.local.json
