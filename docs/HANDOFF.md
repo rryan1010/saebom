@@ -848,7 +848,7 @@ All items are open; build work hadn't started by Oct 28, the date of day 3. Days
 - [x] The dark-first theme tokens. The accent color is a default until the owner answers #7.
 - [x] `supabase init` and `supabase start`; the first migration: all tables, RLS policies and grants (§6), and the `e1rm_by_week` view.
 - [x] pgTAP tests: user B can't read user A's rows; a session that skipped MFA reads nothing; the app can't write training tables.
-- [ ] CI: `npm run verify` on every push; `CLAUDE.md` lists every check it runs.
+- [x] CI: `npm run verify` on every push; `CLAUDE.md` lists every check it runs. **Done Oct 30.**
 - [ ] A GitHub ruleset on `main`: pull request and passing CI required, no force-pushes. It's also the server-side backstop for the agents' guard (D65). Rulesets need a public repo on GitHub Free, so make the repo public first (D57).
 - [x] Owner: archive the bare Expo app, upload it to TestFlight for internal testing only, and install it on the iPhone. **Done Oct 24,** ahead of day 1; signing and upload are proven.
 
