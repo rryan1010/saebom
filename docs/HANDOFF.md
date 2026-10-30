@@ -845,7 +845,7 @@ All items are open; build work hadn't started by Oct 28, the date of day 3. Days
 - [ ] Link `~/Development/saebom` to `rryan1010/saebom` (D57): remove the nested `app/.git` that `create-expo-app` may have made, make sure `app/.gitignore` ignores `/ios`, pull `main` (GitHub's README and LICENSE, plus `CLAUDE.md`, this handoff and the agent setup from the agent-workflow pull request), and push the first commit.
 - [ ] The rest of the §5 layout, including the npm scripts `CLAUDE.md` lists (`CLAUDE.md` and `docs/HANDOFF.md` arrive with the agent-workflow pull request). **App config done Oct 30** (routes in `app/app/`, the tsconfigs, ESLint with Prettier, Metro, EAS, `.env.example`); `docs/emergency-access.md` and `docs/incident-response.md` remain.
 - [x] An Expo app (TypeScript, Expo Router) running in the Simulator and on the iPhone. **Done Oct 24.**
-- [ ] The dark-first theme tokens.
+- [x] The dark-first theme tokens. The accent color is a default until the owner answers #7.
 - [x] `supabase init` and `supabase start`; the first migration: all tables, RLS policies and grants (§6), and the `e1rm_by_week` view.
 - [x] pgTAP tests: user B can't read user A's rows; a session that skipped MFA reads nothing; the app can't write training tables.
 - [ ] CI: `npm run verify` on every push; `CLAUDE.md` lists every check it runs.
