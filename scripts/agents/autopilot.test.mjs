@@ -58,18 +58,21 @@ function world() {
     ].join('\n'),
   );
   chmodSync(join(bin, 'gh'), 0o755);
-  const run = () => {
+  /** Checks once by default; with keys, it runs the key loop on them (end them with q). */
+  const run = (keys) => {
     const result = spawnSync('bash', [SCRIPT], {
       cwd: join(dir, 'main'),
       encoding: 'utf8',
-      input: '',
+      input: keys ?? '',
+      timeout: 60_000,
       env: {
         ...process.env,
         ...GIT_ENV,
         PATH: `${bin}:${process.env.PATH ?? ''}`,
         STUB_DIR: stub,
-        AUTOPILOT_ONCE: '1',
         AUTOPILOT_DRY_RUN: '1',
+        AUTOPILOT_INTERVAL: '1',
+        ...(keys === undefined ? { AUTOPILOT_ONCE: '1' } : {}),
       },
     });
     return { status: result.status, out: `${result.stdout}${result.stderr}` };
@@ -144,6 +147,44 @@ test('stops when every §14 item is ticked', () => {
   assert.equal(done.status, 0);
   assert.match(done.out, /Every §14 item is ticked\. Autopilot is done\./);
   assert.doesNotMatch(done.out, /Dry run/);
+  rmSync(w.dir, { recursive: true, force: true });
+});
+
+const starts = (out) => out.match(/Dry run: would open/g)?.length ?? 0;
+
+test('a restart says what it is watching', () => {
+  const w = world();
+  w.run();
+  const again = w.run();
+  assert.match(again.out, /Watching main at [0-9a-f]+ chore: start\./);
+  assert.equal(starts(again.out), 0);
+  rmSync(w.dir, { recursive: true, force: true });
+});
+
+test('Enter starts a task, but not a second one within 2 minutes', () => {
+  const w = world();
+  const out = w.run('\n\nq').out;
+  assert.match(out, /Waiting for your next merge/);
+  assert.equal(starts(out), 1);
+  assert.match(out, /Not starting: a task started less than 2 minutes ago\. Press f/);
+  assert.match(out, /Autopilot stopped\./);
+  rmSync(w.dir, { recursive: true, force: true });
+});
+
+test('Enter waits while a PR is open, and f starts a task anyway', () => {
+  const w = world();
+  writeFileSync(join(w.stub, 'prs'), '7\tfeat(app): add theme tokens\n');
+  const out = w.run('\nfq').out;
+  assert.match(out, /Not starting: 1 pull request\(s\) still open\. Press f/);
+  assert.equal(starts(out), 1);
+  rmSync(w.dir, { recursive: true, force: true });
+});
+
+test('other keys are ignored', () => {
+  const w = world();
+  const out = w.run('npm run autopilotq').out;
+  assert.equal(starts(out), 0);
+  assert.match(out, /Autopilot stopped\./);
   rmSync(w.dir, { recursive: true, force: true });
 });
 

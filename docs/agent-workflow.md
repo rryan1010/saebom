@@ -69,7 +69,8 @@ The autopilot runs steps 1–3 of the loop for you. You keep reviewing and mergi
    - a question issue needs your answer;
    - `main` moves after a merge;
    - it starts a task, or why it's waiting instead (a PR still open, or a session still running).
-4. **Use the keys** in its window: **Enter** starts a task now, **s** shows the status, **q** quits. It also stops when every §14 item is ticked.
+4. **Use the keys** in its window: **Enter** starts a task now if no pull request is open and no session is running, **f** starts one anyway, **s** shows the status, **q** quits. It never starts two tasks within 2 minutes, and anything typed while it's busy checking GitHub is discarded, so don't type commands into its window. It also stops when every §14 item is ticked.
+5. **When you restart it,** it prints `Watching main at …` and `Waiting for your next merge`, then stays quiet until something happens. A merge made while it was stopped starts a task on the next check; otherwise press Enter to start one.
 
 What to know:
 
