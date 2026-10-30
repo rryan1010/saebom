@@ -1,0 +1,22 @@
+{
+  "name": "saebom",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:db": "supabase test db",
+    "lint:db": "supabase db lint --fail-on error",
+    "check:functions": "deno check supabase/functions/*/index.ts && deno lint supabase/functions",
+    "format:check": "prettier --check .",
+    "test:agents": "node --test \"scripts/agents/*.test.*\"",
+    "db:types": "supabase gen types --lang=typescript --local > supabase/functions/_shared/database.types.ts && prettier --write supabase/functions/_shared/database.types.ts",
+    "invite": "node --env-file=scripts/.env.local scripts/invite.ts",
+    "verify": "npm test && npm run test:db && npm run lint:db && npm run check:functions && npm --prefix app run typecheck && npm --prefix app run lint && npm run format:check && npm run test:agents"
+  },
+  "devDependencies": {
+    "fast-check": "^4.10.2",
+    "prettier": "3.9.10",
+    "supabase": "2.122.0",
+    "vitest": "^5.0.5"
+  }
+}

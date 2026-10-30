@@ -1,0 +1,4 @@
+app/ios/
+app/.expo/
+# pstack reads these files in its own line format
+.claude/rules/
