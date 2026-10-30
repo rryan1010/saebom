@@ -836,8 +836,8 @@ All items are open; build work hadn't started by Oct 28, the date of day 3. Days
 - [ ] The rest of the §5 layout, including the npm scripts `CLAUDE.md` lists (`CLAUDE.md` and `docs/HANDOFF.md` arrive with the agent-workflow pull request).
 - [x] An Expo app (TypeScript, Expo Router) running in the Simulator and on the iPhone. **Done Oct 24.**
 - [ ] The dark-first theme tokens.
-- [ ] `supabase init` and `supabase start`; the first migration: all tables, RLS policies and grants (§6), and the `e1rm_by_week` view.
-- [ ] pgTAP tests: user B can't read user A's rows; a session that skipped MFA reads nothing; the app can't write training tables.
+- [x] `supabase init` and `supabase start`; the first migration: all tables, RLS policies and grants (§6), and the `e1rm_by_week` view.
+- [x] pgTAP tests: user B can't read user A's rows; a session that skipped MFA reads nothing; the app can't write training tables.
 - [ ] CI: `npm run verify` on every push; `CLAUDE.md` lists every check it runs.
 - [ ] A GitHub ruleset on `main`: pull request and passing CI required, no force-pushes. It's also the server-side backstop for the agents' guard (D65). Rulesets need a public repo on GitHub Free, so make the repo public first (D57).
 - [x] Owner: archive the bare Expo app, upload it to TestFlight for internal testing only, and install it on the iPhone. **Done Oct 24,** ahead of day 1; signing and upload are proven.
