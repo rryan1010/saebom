@@ -51,9 +51,6 @@ from public.plans;
 insert into public.set_logs (user_id, session_id, exercise_slug, set_index, weight_lb, reps, effort)
 select user_id, id, 'goblet_squat', 0, 30, 10, 2 from public.workout_sessions;
 
-insert into public.rep_records (user_id, exercise_slug, weight_lb, best_reps, achieved_at)
-select user_id, 'goblet_squat', 30, 10, ended_at from public.workout_sessions;
-
 insert into public.next_targets (user_id, exercise_slug, target_weight_lb, rep_min, rep_max, rir)
 select user_id, 'goblet_squat', 30, 8, 10, 3 from public.plans;
 

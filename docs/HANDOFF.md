@@ -471,7 +471,7 @@ Tests to write before building screens:
 6. **On the server,** `finish-workout`:
    - checks the caller is `aal2` or anonymous;
    - validates the payload: the phone's UTC offset (D66), known exercises, at most 12 exercises with 10 sets each, start before end, end no later than 5 minutes from now, under 6 hours long;
-   - calls `record_session`, which writes the session and its sets in one transaction, after which the trigger updates rep records;
+   - calls `record_session`, which writes the session and its sets in one transaction, after which the trigger updates rep records. It returns `session_id` and `is_new`; a retry with the same `client_id` returns the first session's id with `is_new` false and writes nothing, so `finish-workout` skips progression on a retry;
    - runs progression from `_shared/rules`, applying "Go lighter today" (`went_lighter`, targets unchanged) and "Lower my targets" (the listed exercises, one increment down), writes `next_targets` and any lighter week, and logs `session_recorded`. The comfort answers themselves never leave the phone.
 7. After the calibration pass, each exercise's targets come from its estimated max (§7).
 
@@ -868,7 +868,7 @@ All items are open; build work hadn't started by Oct 28, the date of day 3. Days
 - [x] **Backend:** `_shared/rules`: profile rows and precedence (6–8 baseline, 8–10 for new lifters, D48), splits, exercise filters (avoided areas great or light, D51; no deadlift for new lifters, D52), light exercises (D47), the weight formula, progression with the comfort choices (D50) and lighter weeks. **Plan building done Oct 30** (profile rows, splits, filters, light exercises, the weight formula; workout contents and set counts run on defaults pending #12 and #13). **Progression, comfort choices and lighter weeks done Oct 30** (what counts as below the range and how half the sets rounds run on defaults pending #15 and #16).
 - [x] **Backend:** The unit and property tests from §7.
 - [ ] **Backend:** The exercise catalog seed from the reviewed draft: 25 exercises with graded labels, swaps and cues (§7, D51–D54).
-- [ ] **Backend:** The rep-record trigger and `record_session`, with `execute` revoked from app roles.
+- [x] **Backend:** The rep-record trigger and `record_session`, with `execute` revoked from app roles.
 - [ ] **App:** Spike: the app imports `_shared/rules` through Metro.
 
 **Day 3 · Wed, Oct 28 · Accounts**

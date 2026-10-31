@@ -188,8 +188,6 @@ select throws_ok(
 -- Account deletion cascades to every row; the audit trail survives it.
 insert into public.consents (user_id, kind, policy_version, granted) values
   ('00000000-0000-0000-0000-00000000000a', 'data', '1', true);
-insert into public.rep_records (user_id, exercise_slug, weight_lb, best_reps, achieved_at) values
-  ('00000000-0000-0000-0000-00000000000a', 'goblet_squat', 130, 1, now());
 insert into public.next_targets (user_id, exercise_slug, target_weight_lb, rep_min, rep_max, rir) values
   ('00000000-0000-0000-0000-00000000000a', 'goblet_squat', 100, 8, 10, 3);
 insert into public.lighter_weeks (user_id, week_start, source) values

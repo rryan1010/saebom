@@ -533,7 +533,20 @@ export type Database = {
       };
     };
     Functions: {
-      [_ in never]: never;
+      record_session: {
+        Args: {
+          p_client_id: string;
+          p_day_label: string;
+          p_ended_at: string;
+          p_plan_id: number;
+          p_sets: Json;
+          p_started_at: string;
+          p_user_id: string;
+          p_utc_offset_min: number;
+          p_went_lighter: boolean;
+        };
+        Returns: Record<string, unknown>;
+      };
     };
     Enums: {
       [_ in never]: never;
