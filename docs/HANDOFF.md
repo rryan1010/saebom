@@ -876,7 +876,7 @@ All items are open; build work hadn't started by Oct 28, the date of day 3. Days
 - [ ] **Backend:** The Before User Created hook (§11) in a new migration and the auth settings in `config.toml`, with pgTAP tests for the hook, on the local stack.
 - [ ] **Owner:** Hosted project: link it, push migrations, apply the auth settings and turn on the Before User Created hook (§11).
 - [ ] **Backend:** `scripts/invite.ts`, with invite and reset; the owner runs it.
-- [ ] **App:** The Supabase client with a Keychain storage adapter (split into chunks, this device only) and the AppState refresh listener.
+- [x] **App:** The Supabase client with a Keychain storage adapter (split into chunks, this device only) and the AppState refresh listener. **Done Oct 31:** an aal2 session measured about 2,300 characters, stored as 4 chunks of at most 600, and survives a relaunch in the Simulator; the first launch after an install clears stale items.
 - [ ] **App:** Screens: invite-code sign-in, set password, MFA enrollment and challenge, password sign-in.
 - [ ] **Backend:** Check on the local stack: an email that wasn't invited can't sign up, and anonymous sign-in still works.
 
