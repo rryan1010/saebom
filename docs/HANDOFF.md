@@ -316,7 +316,7 @@ saebom/
 
 - `CLAUDE.md` lists the npm scripts (root and `app/`) and the command each one runs; `npm run verify` runs every check, and CI runs the same.
 
-- Keep `_shared/` free of Deno- and Node-only APIs and use explicit `.ts` import extensions, which Deno needs. The app imports it through Metro: add the folder to `watchFolders` in `metro.config.js` and set `allowImportingTsExtensions` in the app's tsconfig. If Metro fights, fall back to a script that copies `_shared/` into `app/src/shared/` before each run.
+- Keep `_shared/` free of Deno- and Node-only APIs and use explicit `.ts` import extensions, which Deno needs. The app imports it through Metro: add the folder to `watchFolders` in `metro.config.js` and set `allowImportingTsExtensions` in the app's tsconfig. App code imports it as `@shared/rules/index.ts`, a `paths` alias in the app's tsconfig that Metro also resolves. The day 2 spike confirmed it: `tsc` and `expo export --platform ios` both resolve the alias, and the Hermes bundle contains the rules code, so the copy-script fallback isn't needed.
 - Test `_shared/` with Vitest from the repo root.
 
 ## 6. Data model
@@ -869,7 +869,7 @@ All items are open; build work hadn't started by Oct 28, the date of day 3. Days
 - [ ] **Backend:** The unit and property tests from §7.
 - [ ] **Backend:** The exercise catalog seed from the reviewed draft: 25 exercises with graded labels, swaps and cues (§7, D51–D54).
 - [ ] **Backend:** The rep-record trigger and `record_session`, with `execute` revoked from app roles.
-- [ ] **App:** Spike: the app imports `_shared/rules` through Metro.
+- [x] **App:** Spike: the app imports `_shared/rules` through Metro. **Done Oct 31:** the `@shared/*` alias works in `tsc` and Metro (§5).
 
 **Day 3 · Wed, Oct 28 · Accounts**
 
