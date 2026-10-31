@@ -177,6 +177,12 @@ describe('progressTarget: light exercises (D47)', () => {
     expect(lightSession(lightTarget(20), sets(20, [12, 11])).targetWeightLb).toBe(20);
   });
 
+  it('needs 12 reps even when the stored target still carries an older, lower range', () => {
+    const stale = lightTarget(20, { repMin: 8, repMax: 10 });
+    expect(lightSession(stale, sets(20, [10, 10])).targetWeightLb).toBe(20);
+    expect(lightSession(stale, sets(20, [12, 12])).targetWeightLb).toBe(25);
+  });
+
   it('still drops after two sessions below the range', () => {
     const next = lightSession(lightTarget(20, { belowRangeStreak: 1 }), sets(20, [9, 9]));
     expect(next.targetWeightLb).toBe(15);

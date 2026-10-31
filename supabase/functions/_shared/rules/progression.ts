@@ -1,3 +1,4 @@
+import { LIGHT_PRESCRIPTION } from './profiles.ts';
 import type { Exercise, PlanItem } from './types.ts';
 import { estimateE1rmLb, roundDownToLoad, targetWeightLb } from './weight.ts';
 
@@ -50,15 +51,15 @@ function classifySession(
   item: SessionResult['item'],
   sets: readonly LoggedSet[],
 ): Outcome {
-  const reachesTop = (set: LoggedSet): boolean =>
-    set.weightLb >= weightLb && set.reps >= target.repMax;
-  // A light exercise (D47) also needs no hard set; its repMax of 12 covers "every set hit 12 reps".
+  // A light exercise (D47) needs 12 reps whatever range its stored target carries, and no hard set.
+  const topReps = item.isLight ? LIGHT_PRESCRIPTION.repMax : target.repMax;
+  const reachesTop = (set: LoggedSet): boolean => set.weightLb >= weightLb && set.reps >= topReps;
   const isTop =
     sets.length >= item.sets &&
     sets.every(reachesTop) &&
     (!item.isLight || sets.every((set) => set.effort !== HARD_EFFORT));
   if (isTop) return 'top';
-  // Default pending the owner's answer (#TBD): one set under repMin puts the whole session below the range.
+  // Default pending the owner's answer (#15): one set under repMin puts the whole session below the range.
   if (sets.some((set) => set.reps < target.repMin)) return 'below';
   return 'within';
 }

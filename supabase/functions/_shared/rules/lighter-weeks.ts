@@ -47,7 +47,7 @@ export function lighterWeekDue(input: {
   return stale.length * 2 >= slugs.length;
 }
 
-/** Sets during a lighter week: half, rounded down, at least 1. Default pending the owner's answer (#TBD). */
+/** Sets during a lighter week: half, rounded down, at least 1. Default pending the owner's answer (#16). */
 export function lighterWeekSets(sets: number): number {
   return Math.max(1, Math.floor(sets / 2));
 }
