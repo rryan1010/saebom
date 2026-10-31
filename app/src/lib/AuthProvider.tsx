@@ -1,41 +1,19 @@
+import { isAuthRetryableFetchError } from '@supabase/supabase-js';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
-import {
-  assuranceLevelOf,
-  authStatusFor,
-  includesPasswordMethod,
-  PASSWORD_SESSION_KEY,
-  sessionIdOf,
-  type AuthFacts,
-  type AuthStatus,
-} from '@/lib/auth-state';
-import { supabase } from '@/lib/supabase';
+import { authStatusFor, factsFor, parseStoredSession, type AuthStatus } from '@/lib/auth-state';
+import { readStoredSession, supabase } from '@/lib/supabase';
 
 const AuthContext = createContext<AuthStatus | null>(null);
 
 async function readStatus(): Promise<AuthStatus> {
-  const { data: sessionData } = await supabase.auth.getSession();
-  const session = sessionData.session;
-  if (session === null) return authStatusFor({ hasSession: false });
-
-  const { data: assurance } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-  const currentLevel = assuranceLevelOf(assurance?.currentLevel);
-  const hasVerifiedFactor = (session.user.factors ?? []).some(
-    (factor) => factor.factor_type === 'totp' && factor.status === 'verified',
-  );
-  const sessionId = sessionIdOf(session.access_token);
-
-  const facts: AuthFacts = {
-    hasSession: true,
-    isAnonymous: session.user.is_anonymous === true,
-    currentLevel,
-    // An aal2 session proves a verified factor even when the cached user is stale.
-    hasVerifiedTotp: hasVerifiedFactor || currentLevel === 'aal2',
-    signedInWithPassword: includesPasswordMethod(assurance?.currentAuthenticationMethods ?? []),
-    passwordSetForSession:
-      sessionId !== null && session.user.user_metadata[PASSWORD_SESSION_KEY] === sessionId,
-  };
-  return authStatusFor(facts);
+  const { data, error } = await supabase.auth.getSession();
+  // Offline with an expired access token, auth-js returns no session but keeps the stored one;
+  // the gate routes from that stored session so a signed-in tester isn't sent to sign-in.
+  const session =
+    data.session ??
+    (isAuthRetryableFetchError(error) ? parseStoredSession(await readStoredSession()) : null);
+  return authStatusFor(factsFor(session));
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
