@@ -114,6 +114,7 @@ Change the database:
 ```bash
 npx supabase migration new <snake_case_name>   # new file in supabase/migrations/
 npx supabase test new <name>                   # new pgTAP file in supabase/tests/
+npm run db:seed    # node scripts/seed-catalog.ts: regenerate supabase/seed.sql from _shared/rules/catalog.ts
 npm run db:types   # supabase gen types --lang=typescript --local > supabase/functions/_shared/database.types.ts && prettier --write supabase/functions/_shared/database.types.ts
 ```
 

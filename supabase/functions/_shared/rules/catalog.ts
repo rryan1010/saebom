@@ -1,8 +1,8 @@
 import type { Exercise } from './types.ts';
 
-// Stand-in for the seeded catalog until it lands. Tags are conservative (D42, D51), steps follow D53,
-// main lifts D41, swaps D44 and D54.
-export const FIXTURE_CATALOG: readonly Exercise[] = [
+// The catalog `npm run db:seed` writes to supabase/seed.sql, and the one the plan-engine tests run
+// against. Tags are conservative (D42, D51), steps follow D53, main lifts D41, swaps D44 and D54.
+export const CATALOG: readonly Exercise[] = [
   {
     slug: 'back_squat',
     name: 'Back squat',
@@ -61,7 +61,11 @@ export const FIXTURE_CATALOG: readonly Exercise[] = [
     minLoadLb: 45,
     isMainLift: true,
     allowedSwaps: ['romanian_deadlift', 'dumbbell_romanian_deadlift'],
-    cues: ['Pull the slack out of the bar', 'Keep the bar against your legs'],
+    cues: [
+      'Pull the slack out of the bar',
+      'Keep the bar against your legs',
+      'Raise the bar on blocks if small plates leave it low',
+    ],
   },
   {
     slug: 'romanian_deadlift',
@@ -380,8 +384,8 @@ export const FIXTURE_CATALOG: readonly Exercise[] = [
   },
 ];
 
-export const fixtureExercise = (slug: string): Exercise => {
-  const found = FIXTURE_CATALOG.find((exercise) => exercise.slug === slug);
-  if (found === undefined) throw new Error(`no fixture exercise ${slug}`);
+export const catalogExercise = (slug: string): Exercise => {
+  const found = CATALOG.find((exercise) => exercise.slug === slug);
+  if (found === undefined) throw new Error(`no catalog exercise ${slug}`);
   return found;
 };
