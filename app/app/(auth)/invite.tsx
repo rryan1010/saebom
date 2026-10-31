@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useState } from 'react';
 
 import { supabase } from '@/lib/supabase';
@@ -5,6 +6,7 @@ import { useAuthAction } from '@/lib/useAuthAction';
 import { AuthScreen } from '@/ui/AuthScreen';
 import { ErrorText } from '@/ui/ErrorText';
 import { PrimaryButton } from '@/ui/PrimaryButton';
+import { TextButton } from '@/ui/TextButton';
 import { TextField } from '@/ui/TextField';
 
 export default function Invite() {
@@ -53,6 +55,7 @@ export default function Invite() {
       />
       <ErrorText message={error} />
       <PrimaryButton label="Continue" onPress={submit} busy={busy} disabled={!canSubmit} />
+      <TextButton label="Back to sign in" onPress={() => router.replace('/sign-in')} />
     </AuthScreen>
   );
 }
