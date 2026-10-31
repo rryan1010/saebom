@@ -6,7 +6,7 @@
     "test": "vitest run",
     "test:db": "supabase test db",
     "lint:db": "supabase db lint --fail-on error",
-    "check:functions": "deno check supabase/functions/*/index.ts && deno lint supabase/functions",
+    "check:functions": "deno check supabase/functions/*/index.ts supabase/functions/_shared/*/index.ts && deno lint supabase/functions",
     "format:check": "prettier --check .",
     "test:agents": "node --test \"scripts/agents/*.test.*\"",
     "db:types": "supabase gen types --lang=typescript --local > supabase/functions/_shared/database.types.ts && prettier --write supabase/functions/_shared/database.types.ts",
