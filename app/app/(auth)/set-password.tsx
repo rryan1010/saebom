@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { PASSWORD_SESSION_KEY, sessionIdOf } from '@/lib/auth-state';
+import { claimsOf, PASSWORD_SESSION_KEY } from '@/lib/auth-state';
 import { supabase } from '@/lib/supabase';
 import { useAuthAction } from '@/lib/useAuthAction';
 import { AuthScreen } from '@/ui/AuthScreen';
@@ -13,7 +13,7 @@ const MIN_PASSWORD_LENGTH = 12;
 
 async function savePassword(password: string) {
   const { data } = await supabase.auth.getSession();
-  const sessionId = data.session === null ? null : sessionIdOf(data.session.access_token);
+  const sessionId = data.session === null ? null : claimsOf(data.session.access_token).sessionId;
   return supabase.auth.updateUser({ password, data: { [PASSWORD_SESSION_KEY]: sessionId } });
 }
 
