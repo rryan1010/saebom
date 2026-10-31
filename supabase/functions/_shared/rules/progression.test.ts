@@ -183,6 +183,16 @@ describe('progressTarget: light exercises (D47)', () => {
     expect(lightSession(stale, sets(20, [12, 12])).targetWeightLb).toBe(25);
   });
 
+  it('counts 9 reps as below the range even when the stored target still says 8–10', () => {
+    const stale = lightTarget(20, { repMin: 8, repMax: 10, belowRangeStreak: 1 });
+    expect(lightSession(stale, sets(20, [9, 9])).targetWeightLb).toBe(15);
+  });
+
+  it('calibrates for 10 reps with 4 in reserve even when the stored target says 6–8 at 2', () => {
+    const uncalibrated = targetOf(null, { repMin: 6, repMax: 8, rir: 2 });
+    expect(lightSession(uncalibrated, sets(30, [12, 12])).targetWeightLb).toBe(25);
+  });
+
   it('still drops after two sessions below the range', () => {
     const next = lightSession(lightTarget(20, { belowRangeStreak: 1 }), sets(20, [9, 9]));
     expect(next.targetWeightLb).toBe(15);
@@ -436,7 +446,8 @@ describe('progressTarget properties', () => {
       const { targetWeightLb: before } = result.target;
       if (!result.item.isLight || before === null || next.targetWeightLb === null) return;
       if (next.targetWeightLb <= before) return;
-      expect(result.sets.every((set) => set.reps >= result.target.repMax)).toBe(true);
+      expect(result.sets.length).toBeGreaterThanOrEqual(result.item.sets);
+      expect(result.sets.every((set) => set.reps >= 12)).toBe(true);
       expect(result.sets.some((set) => set.effort === 3)).toBe(false);
     });
   });

@@ -9,8 +9,13 @@ const LOCAL_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
 // Dates are local calendar dates (D66), so day counts go through UTC midnights and never see a DST shift.
 function dayNumber(date: string): number {
   const parts = LOCAL_DATE.exec(date);
-  if (parts === null) throw new RangeError(`not a YYYY-MM-DD date: ${date}`);
-  return Date.UTC(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3])) / DAY_MS;
+  const ms =
+    parts === null ? NaN : Date.UTC(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3]));
+  // Date.UTC rolls 2026-02-30 over into March, so only a date that round-trips is real.
+  if (Number.isNaN(ms) || new Date(ms).toISOString().slice(0, 10) !== date) {
+    throw new RangeError(`not a YYYY-MM-DD date: ${date}`);
+  }
+  return ms / DAY_MS;
 }
 
 /** True when no existing lighter week starts within 28 days of `weekStart`, on either side. */

@@ -48,6 +48,12 @@ describe('lighterWeekAllowed', () => {
   it('rejects a malformed date instead of allowing the week', () => {
     expect(() => lighterWeekAllowed(MONDAY, ['soon'])).toThrow(RangeError);
   });
+
+  it('rejects a date that does not exist instead of rolling it over', () => {
+    expect(() => lighterWeekAllowed(MONDAY, ['2026-02-30'])).toThrow(RangeError);
+    expect(() => lighterWeekAllowed('2026-99-99', [])).toThrow(RangeError);
+    expect(lighterWeekAllowed('2028-02-29', [])).toBe(true);
+  });
 });
 
 describe('lighterWeekDue', () => {

@@ -45,33 +45,38 @@ export interface SessionResult {
 
 type Outcome = 'top' | 'within' | 'below';
 
+type RepRange = Pick<Target, 'repMin' | 'repMax' | 'rir'>;
+
+// A light exercise (D47) follows 10–12 whatever range its stored target carries.
+const repRangeOf = (target: Target, item: SessionResult['item']): RepRange =>
+  item.isLight ? LIGHT_PRESCRIPTION : target;
+
 function classifySession(
   weightLb: number,
-  target: Target,
+  range: RepRange,
   item: SessionResult['item'],
   sets: readonly LoggedSet[],
 ): Outcome {
-  // A light exercise (D47) needs 12 reps whatever range its stored target carries, and no hard set.
-  const topReps = item.isLight ? LIGHT_PRESCRIPTION.repMax : target.repMax;
-  const reachesTop = (set: LoggedSet): boolean => set.weightLb >= weightLb && set.reps >= topReps;
+  const reachesTop = (set: LoggedSet): boolean =>
+    set.weightLb >= weightLb && set.reps >= range.repMax;
   const isTop =
     sets.length >= item.sets &&
     sets.every(reachesTop) &&
     (!item.isLight || sets.every((set) => set.effort !== HARD_EFFORT));
   if (isTop) return 'top';
   // Default pending the owner's answer (#15): one set under repMin puts the whole session below the range.
-  if (sets.some((set) => set.reps < target.repMin)) return 'below';
+  if (sets.some((set) => set.reps < range.repMin)) return 'below';
   return 'within';
 }
 
-function calibratedWeight(target: Target, exercise: LoadGrid, sets: readonly LoggedSet[]): number {
+function calibratedWeight(range: RepRange, exercise: LoadGrid, sets: readonly LoggedSet[]): number {
   const heaviest = Math.max(...sets.map((set) => set.weightLb));
   const e1rms = sets.flatMap((set) => {
     const e1rm = estimateE1rmLb(set.weightLb, set.reps);
     return e1rm === null ? [] : [e1rm];
   });
   const e1rm = e1rms.length > 0 ? Math.max(...e1rms) : heaviest;
-  const raw = targetWeightLb(e1rm, target.repMin, target.rir, exercise);
+  const raw = targetWeightLb(e1rm, range.repMin, range.rir, exercise);
   return roundDownToLoad(Math.min(raw, heaviest + exercise.incrementLb), exercise);
 }
 
@@ -96,12 +101,12 @@ export function progressTarget(result: SessionResult): Target {
   if (weightLb === null) {
     return {
       ...target,
-      targetWeightLb: calibratedWeight(target, exercise, sets),
+      targetWeightLb: calibratedWeight(repRangeOf(target, item), exercise, sets),
       belowRangeStreak: 0,
     };
   }
 
-  switch (classifySession(weightLb, target, item, sets)) {
+  switch (classifySession(weightLb, repRangeOf(target, item), item, sets)) {
     case 'top':
       return {
         ...target,
