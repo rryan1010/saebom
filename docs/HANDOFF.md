@@ -854,7 +854,7 @@ All items are open; build work hadn't started by Oct 28, the date of day 3. Days
 
 **Day 2 · Tue, Oct 27 · Plan engine**
 
-- [ ] `_shared/rules`: profile rows and precedence (6–8 baseline, 8–10 for new lifters, D48), splits, exercise filters (avoided areas great or light, D51; no deadlift for new lifters, D52), light exercises (D47), the weight formula, progression with the comfort choices (D50) and lighter weeks. **Plan building done Oct 30** (profile rows, splits, filters, light exercises, the weight formula; workout contents and set counts run on defaults pending #12 and #13); progression, comfort choices and lighter weeks are next.
+- [x] `_shared/rules`: profile rows and precedence (6–8 baseline, 8–10 for new lifters, D48), splits, exercise filters (avoided areas great or light, D51; no deadlift for new lifters, D52), light exercises (D47), the weight formula, progression with the comfort choices (D50) and lighter weeks. **Plan building done Oct 30** (profile rows, splits, filters, light exercises, the weight formula; workout contents and set counts run on defaults pending #12 and #13). **Progression, comfort choices and lighter weeks done Oct 30** (what counts as below the range and how half the sets rounds run on defaults pending #15 and #16).
 - [ ] The unit and property tests from §7.
 - [ ] The exercise catalog seed from the reviewed draft: 25 exercises with graded labels, swaps and cues (§7, D51–D54).
 - [ ] The rep-record trigger and `record_session`, with `execute` revoked from app roles.
