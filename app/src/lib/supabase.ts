@@ -64,6 +64,10 @@ export const supabase = createClient<Database>(url, publishableKey, {
   },
 });
 
+export function readStoredSession(): Promise<string | null> {
+  return storage.getItem(STORAGE_KEY);
+}
+
 AppState.addEventListener('change', (state) => {
   if (state === 'active') {
     void supabase.auth.startAutoRefresh();
