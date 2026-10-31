@@ -10,7 +10,11 @@ insert into public.exercises
   (slug, name, movement_pattern, equipment, muscle_great, increment_lb, min_load_lb, cues)
 values
   ('goblet_squat', 'Goblet squat', 'squat', '{dumbbell}', 'legs', 5, 5,
-   '{"Chest up","Knees out"}');
+   '{"Chest up","Knees out"}')
+on conflict (slug) do nothing;
+
+-- The seed may have loaded the catalog already; every reader should see all of it.
+select set_config('test.catalog_size', (select count(*)::text from public.exercises), true);
 
 insert into public.invites (email) values ('a@example.com');
 insert into public.ai_usage (day, calls) values ('2026-10-26', 1);
@@ -106,7 +110,8 @@ select is((select count(*) from public.coach_suggestions), 1::bigint,
   'B reads its own coach suggestions');
 select is((select count(*) from public.audit_events), 1::bigint, 'B reads its own audit events');
 select is((select count(*) from public.e1rm_by_week), 1::bigint, 'B reads its own estimated maxes');
-select is((select count(*) from public.exercises), 1::bigint, 'B reads the catalog');
+select is((select count(*) from public.exercises), current_setting('test.catalog_size')::bigint,
+  'B reads the catalog');
 
 -- User A, signed in with a password but no MFA (aal1): reads nothing, even its own rows.
 select set_config('request.jwt.claims',
@@ -135,7 +140,8 @@ select set_config('request.jwt.claims',
 
 select is((select count(*) from public.profiles), 1::bigint, 'demo: reads its own profile');
 select is((select count(*) from public.set_logs), 1::bigint, 'demo: reads its own set logs');
-select is((select count(*) from public.exercises), 1::bigint, 'demo: reads the catalog');
+select is((select count(*) from public.exercises), current_setting('test.catalog_size')::bigint,
+  'demo: reads the catalog');
 select is((select count(*) from public.set_logs where user_id <> auth.uid()), 0::bigint,
   'demo: reads no one else''s set logs');
 

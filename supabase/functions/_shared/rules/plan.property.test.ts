@@ -1,6 +1,6 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { FIXTURE_CATALOG } from './catalog.fixture.ts';
+import { CATALOG } from './catalog.ts';
 import { buildPlan } from './plan.ts';
 import { profileRow } from './profiles.ts';
 import { EFFORTS, progressTarget } from './progression.ts';
@@ -9,7 +9,7 @@ import { SPLIT_WORKOUTS } from './templates.ts';
 import { EQUIPMENT_SETUPS, EXPERIENCE, GOAL_INTENSITY, REGIONS } from './types.ts';
 import type { Exercise, Plan, PlanItem, Profile, Region } from './types.ts';
 
-const bySlug = new Map(FIXTURE_CATALOG.map((exercise) => [exercise.slug, exercise]));
+const bySlug = new Map(CATALOG.map((exercise) => [exercise.slug, exercise]));
 
 const exerciseOf = (item: PlanItem): Exercise => {
   const exercise = bySlug.get(item.exerciseSlug);
@@ -57,7 +57,7 @@ const itemsByDay = (plan: Plan): PlanItem[][] => {
 
 const check = (property: (profile: Profile, plan: Plan) => void) =>
   fc.assert(
-    fc.property(profileArb, (profile) => property(profile, buildPlan(profile, FIXTURE_CATALOG))),
+    fc.property(profileArb, (profile) => property(profile, buildPlan(profile, CATALOG))),
     { numRuns: 500 },
   );
 
@@ -179,7 +179,7 @@ describe('buildPlan properties', () => {
     fc.assert(
       fc.property(profileArb, (profile) => {
         const snapshot = JSON.stringify(profile);
-        expect(buildPlan(profile, FIXTURE_CATALOG)).toEqual(buildPlan(profile, FIXTURE_CATALOG));
+        expect(buildPlan(profile, CATALOG)).toEqual(buildPlan(profile, CATALOG));
         expect(JSON.stringify(profile)).toBe(snapshot);
       }),
     );
@@ -191,7 +191,7 @@ describe('changing injured areas and choices', () => {
     fc.assert(
       fc.property(profileArb, statusesArb, (profile, statuses) => {
         const changed = withStatuses(profile, statuses);
-        for (const item of buildPlan(changed, FIXTURE_CATALOG).items) {
+        for (const item of buildPlan(changed, CATALOG).items) {
           for (const area of changed.avoidAreas) {
             expect(loads(exerciseOf(item), area), `${item.exerciseSlug} loads ${area}`).toBe(false);
           }
@@ -209,7 +209,7 @@ describe('changing injured areas and choices', () => {
           avoidAreas: [...new Set([...profile.avoidAreas, ...profile.lightAreas])],
           lightAreas: [],
         };
-        const plan = buildPlan(moved, FIXTURE_CATALOG);
+        const plan = buildPlan(moved, CATALOG);
         for (const item of plan.items) {
           expect(item.isLight).toBe(false);
           for (const area of profile.lightAreas) {
@@ -242,9 +242,7 @@ describe('readiness answers (D49)', () => {
           readinessAckAt: acknowledged ? '2026-10-30T12:00:00Z' : null,
           lightAckAt: acknowledged ? '2026-10-30T12:00:00Z' : null,
         } as Profile;
-        expect(buildPlan(withReadiness, FIXTURE_CATALOG)).toEqual(
-          buildPlan(profile, FIXTURE_CATALOG),
-        );
+        expect(buildPlan(withReadiness, CATALOG)).toEqual(buildPlan(profile, CATALOG));
       }),
       { numRuns: 300 },
     );
@@ -294,7 +292,7 @@ describe('weights from profile to progression', () => {
         calibrationArb,
         fc.array(sessionArb, { minLength: 1, maxLength: 6 }),
         (profile, calibration, later) => {
-          for (const item of buildPlan(profile, FIXTURE_CATALOG).items) {
+          for (const item of buildPlan(profile, CATALOG).items) {
             const exercise = exerciseOf(item);
             let target: Target = {
               exerciseSlug: item.exerciseSlug,

@@ -1,6 +1,6 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { FIXTURE_CATALOG, fixtureExercise } from './catalog.fixture.ts';
+import { CATALOG, catalogExercise } from './catalog.ts';
 import { estimateE1rmLb, roundDownToLoad, targetWeightLb } from './weight.ts';
 
 const barbellLower = { minLoadLb: 45, incrementLb: 10 };
@@ -81,7 +81,7 @@ describe('targetWeightLb properties', () => {
         fc.double({ min: 0.1, max: 3000, noNaN: true }),
         fc.integer({ min: 6, max: 12 }),
         fc.integer({ min: 1, max: 4 }),
-        fc.constantFrom(...FIXTURE_CATALOG),
+        fc.constantFrom(...CATALOG),
         (e1rmLb, repMin, rir, exercise) => {
           const weightLb = targetWeightLb(e1rmLb, repMin, rir, exercise);
           const raw = e1rmLb / (1 + (repMin + rir) / 30);
@@ -94,13 +94,13 @@ describe('targetWeightLb properties', () => {
     );
   });
 
-  it('is exact on every grid point of every fixture exercise', () => {
-    for (const exercise of FIXTURE_CATALOG) {
+  it('is exact on every grid point of every catalog exercise', () => {
+    for (const exercise of CATALOG) {
       for (let k = 0; k <= 40; k++) {
         const onGrid = exercise.minLoadLb + k * exercise.incrementLb;
         expect(roundDownToLoad(onGrid, exercise), `${exercise.slug} k=${k}`).toBe(onGrid);
       }
     }
-    expect(fixtureExercise('back_squat').minLoadLb).toBe(45);
+    expect(catalogExercise('back_squat').minLoadLb).toBe(45);
   });
 });

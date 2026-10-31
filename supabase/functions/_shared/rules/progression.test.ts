@@ -1,11 +1,11 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { FIXTURE_CATALOG, fixtureExercise } from './catalog.fixture.ts';
+import { CATALOG, catalogExercise } from './catalog.ts';
 import { EFFORTS, lowerTarget, progressTarget } from './progression.ts';
 import type { Effort, LoggedSet, SessionResult, Target } from './progression.ts';
 
-const barbell = fixtureExercise('back_squat');
-const dumbbell = fixtureExercise('dumbbell_curl');
+const barbell = catalogExercise('back_squat');
+const dumbbell = catalogExercise('dumbbell_curl');
 
 const targetOf = (weightLb: number | null, overrides: Partial<Target> = {}): Target => ({
   exerciseSlug: 'back_squat',
@@ -301,10 +301,10 @@ describe('Lower my targets (D50)', () => {
 });
 
 describe('progressTarget properties', () => {
-  const gridWeight = (exercise: (typeof FIXTURE_CATALOG)[number], k: number): number =>
+  const gridWeight = (exercise: (typeof CATALOG)[number], k: number): number =>
     (Math.round(exercise.minLoadLb * 10) + k * Math.round(exercise.incrementLb * 10)) / 10;
 
-  const onGrid = (weightLb: number, exercise: (typeof FIXTURE_CATALOG)[number]): boolean => {
+  const onGrid = (weightLb: number, exercise: (typeof CATALOG)[number]): boolean => {
     const tenths = weightLb * 10;
     const stepTenths = Math.round(exercise.incrementLb * 10);
     return (
@@ -315,7 +315,7 @@ describe('progressTarget properties', () => {
 
   const sessionArb: fc.Arbitrary<SessionResult> = fc
     .record({
-      exercise: fc.constantFrom(...FIXTURE_CATALOG),
+      exercise: fc.constantFrom(...CATALOG),
       k: fc.option(fc.integer({ min: 0, max: 80 }), { nil: null }),
       repMin: fc.integer({ min: 1, max: 12 }),
       repSpan: fc.integer({ min: 0, max: 6 }),

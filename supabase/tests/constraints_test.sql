@@ -8,7 +8,8 @@ insert into auth.users (id, email) values
 insert into public.exercises
   (slug, name, movement_pattern, equipment, muscle_great, increment_lb, min_load_lb, cues)
 values
-  ('goblet_squat', 'Goblet squat', 'squat', '{dumbbell}', 'legs', 5, 5, '{"Chest up","Knees out"}');
+  ('goblet_squat', 'Goblet squat', 'squat', '{dumbbell}', 'legs', 5, 5, '{"Chest up","Knees out"}')
+on conflict (slug) do nothing;
 
 insert into public.plans (id, user_id, version, source, status) overriding system value values
   (1, '00000000-0000-0000-0000-00000000000a', 1, 'rules', 'active'),
