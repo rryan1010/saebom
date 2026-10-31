@@ -123,7 +123,7 @@ Test and check (everything passes before every PR):
 npm test                         # vitest run: plan engine and coach checker, unit and property tests
 npm run test:db                  # supabase test db: pgTAP RLS tests
 npm run lint:db                  # supabase db lint --fail-on error
-npm run check:functions          # deno check supabase/functions/*/index.ts && deno lint supabase/functions
+npm run check:functions          # deno check supabase/functions/*/index.ts supabase/functions/_shared/*/index.ts && deno lint supabase/functions
 npm --prefix app run typecheck   # tsc --noEmit
 npm --prefix app run lint        # expo lint
 npm run format:check             # prettier --check .
