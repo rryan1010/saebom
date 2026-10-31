@@ -316,7 +316,7 @@ saebom/
 
 - `CLAUDE.md` lists the npm scripts (root and `app/`) and the command each one runs; `npm run verify` runs every check, and CI runs the same.
 
-- Keep `_shared/` free of Deno- and Node-only APIs and use explicit `.ts` import extensions, which Deno needs. The app imports it through Metro: add the folder to `watchFolders` in `metro.config.js` and set `allowImportingTsExtensions` in the app's tsconfig. If Metro fights, fall back to a script that copies `_shared/` into `app/src/shared/` before each run.
+- Keep `_shared/` free of Deno- and Node-only APIs and use explicit `.ts` import extensions, which Deno needs. The app imports it through Metro: add the folder to `watchFolders` in `metro.config.js` and set `allowImportingTsExtensions` in the app's tsconfig. App code imports it as `@shared/rules/index.ts`, a `paths` alias in the app's tsconfig that Metro also resolves. The day 2 spike confirmed it: `tsc` and `expo export --platform ios` both resolve the alias, and the Hermes bundle contains the rules code, so the copy-script fallback isn't needed.
 - Test `_shared/` with Vitest from the repo root.
 
 ## 6. Data model
@@ -869,15 +869,15 @@ All items are open; build work hadn't started by Oct 28, the date of day 3. Days
 - [x] **Backend:** The unit and property tests from §7.
 - [ ] **Backend:** The exercise catalog seed from the reviewed draft: 25 exercises with graded labels, swaps and cues (§7, D51–D54).
 - [x] **Backend:** The rep-record trigger and `record_session`, with `execute` revoked from app roles.
-- [ ] **App:** Spike: the app imports `_shared/rules` through Metro.
+- [x] **App:** Spike: the app imports `_shared/rules` through Metro. **Done Oct 31:** the `@shared/*` alias works in `tsc` and Metro (§5).
 
 **Day 3 · Wed, Oct 28 · Accounts**
 
 - [ ] **Backend:** The Before User Created hook (§11) in a new migration and the auth settings in `config.toml`, with pgTAP tests for the hook, on the local stack.
 - [ ] **Owner:** Hosted project: link it, push migrations, apply the auth settings and turn on the Before User Created hook (§11).
 - [ ] **Backend:** `scripts/invite.ts`, with invite and reset; the owner runs it.
-- [ ] **App:** The Supabase client with a Keychain storage adapter (split into chunks, this device only) and the AppState refresh listener.
-- [ ] **App:** Screens: invite-code sign-in, set password, MFA enrollment and challenge, password sign-in.
+- [x] **App:** The Supabase client with a Keychain storage adapter (split into chunks, this device only) and the AppState refresh listener. **Done Oct 31:** an aal2 session measured about 2,300 characters, stored as 4 chunks of at most 600, and survives a relaunch in the Simulator; the first launch after an install clears stale items.
+- [x] **App:** Screens: invite-code sign-in, set password, MFA enrollment and challenge, password sign-in. **Done Oct 31:** a reset code leads to MFA and then a new password, a default pending #21.
 - [ ] **Backend:** Check on the local stack: an email that wasn't invited can't sign up, and anonymous sign-in still works.
 
 **Day 4 · Thu, Oct 29 · Consent, onboarding, first plan**
