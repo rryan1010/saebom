@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { FIXTURE_CATALOG, fixtureExercise } from './catalog.fixture.ts';
+import { CATALOG, catalogExercise } from './catalog.ts';
 import { buildPlan, exerciseTreatment, nextDayLabel } from './plan.ts';
 import { REGIONS } from './types.ts';
 import type { Plan, Profile } from './types.ts';
@@ -26,15 +26,15 @@ const lightSlugs = (plan: Plan): string[] =>
 describe('exerciseTreatment', () => {
   it('excludes an exercise whose equipment is not in the setup', () => {
     const dumbbellsOnly = profile({ equipment: 'dumbbells_only' });
-    expect(exerciseTreatment(fixtureExercise('bench_press'), dumbbellsOnly)).toBe('excluded');
-    expect(exerciseTreatment(fixtureExercise('leg_press'), dumbbellsOnly)).toBe('excluded');
-    expect(exerciseTreatment(fixtureExercise('lat_pulldown'), dumbbellsOnly)).toBe('excluded');
-    expect(exerciseTreatment(fixtureExercise('goblet_squat'), dumbbellsOnly)).toBe('normal');
-    expect(exerciseTreatment(fixtureExercise('bench_press'), profile())).toBe('normal');
+    expect(exerciseTreatment(catalogExercise('bench_press'), dumbbellsOnly)).toBe('excluded');
+    expect(exerciseTreatment(catalogExercise('leg_press'), dumbbellsOnly)).toBe('excluded');
+    expect(exerciseTreatment(catalogExercise('lat_pulldown'), dumbbellsOnly)).toBe('excluded');
+    expect(exerciseTreatment(catalogExercise('goblet_squat'), dumbbellsOnly)).toBe('normal');
+    expect(exerciseTreatment(catalogExercise('bench_press'), profile())).toBe('normal');
   });
 
   it('excludes the deadlift for new lifters only (D52)', () => {
-    const deadlift = fixtureExercise('deadlift');
+    const deadlift = catalogExercise('deadlift');
     expect(exerciseTreatment(deadlift, profile({ experience: 'new' }))).toBe('excluded');
     expect(exerciseTreatment(deadlift, profile({ experience: 'new', lightAreas: ['wrist'] }))).toBe(
       'excluded',
@@ -42,55 +42,55 @@ describe('exerciseTreatment', () => {
     expect(exerciseTreatment(deadlift, profile({ experience: 'intermediate' }))).toBe('normal');
     expect(exerciseTreatment(deadlift, profile({ experience: 'experienced' }))).toBe('normal');
     expect(
-      exerciseTreatment(fixtureExercise('romanian_deadlift'), profile({ experience: 'new' })),
+      exerciseTreatment(catalogExercise('romanian_deadlift'), profile({ experience: 'new' })),
     ).toBe('normal');
   });
 
   it('excludes an avoided area whether the exercise loads it great or light (D51)', () => {
     const avoidShoulder = profile({ avoidAreas: ['shoulder'] });
-    expect(exerciseTreatment(fixtureExercise('bench_press'), avoidShoulder)).toBe('excluded');
-    expect(exerciseTreatment(fixtureExercise('barbell_row'), avoidShoulder)).toBe('excluded');
-    expect(exerciseTreatment(fixtureExercise('leg_curl'), avoidShoulder)).toBe('normal');
+    expect(exerciseTreatment(catalogExercise('bench_press'), avoidShoulder)).toBe('excluded');
+    expect(exerciseTreatment(catalogExercise('barbell_row'), avoidShoulder)).toBe('excluded');
+    expect(exerciseTreatment(catalogExercise('leg_curl'), avoidShoulder)).toBe('normal');
     const avoidLowerBack = profile({ avoidAreas: ['lower_back'] });
-    expect(exerciseTreatment(fixtureExercise('deadlift'), avoidLowerBack)).toBe('excluded');
-    expect(exerciseTreatment(fixtureExercise('back_squat'), avoidLowerBack)).toBe('excluded');
-    expect(exerciseTreatment(fixtureExercise('leg_press'), avoidLowerBack)).toBe('excluded');
+    expect(exerciseTreatment(catalogExercise('deadlift'), avoidLowerBack)).toBe('excluded');
+    expect(exerciseTreatment(catalogExercise('back_squat'), avoidLowerBack)).toBe('excluded');
+    expect(exerciseTreatment(catalogExercise('leg_press'), avoidLowerBack)).toBe('excluded');
   });
 
   it('keeps a dumbbell or machine exercise light for a light area, great or light (D51)', () => {
     const lightShoulder = profile({ lightAreas: ['shoulder'] });
-    expect(exerciseTreatment(fixtureExercise('dumbbell_bench_press'), lightShoulder)).toBe('light');
-    expect(exerciseTreatment(fixtureExercise('lat_pulldown'), lightShoulder)).toBe('light');
+    expect(exerciseTreatment(catalogExercise('dumbbell_bench_press'), lightShoulder)).toBe('light');
+    expect(exerciseTreatment(catalogExercise('lat_pulldown'), lightShoulder)).toBe('light');
     const lightLowerBack = profile({ lightAreas: ['lower_back'] });
-    expect(exerciseTreatment(fixtureExercise('leg_press'), lightLowerBack)).toBe('light');
-    expect(exerciseTreatment(fixtureExercise('goblet_squat'), lightLowerBack)).toBe('light');
-    expect(exerciseTreatment(fixtureExercise('leg_curl'), lightLowerBack)).toBe('normal');
+    expect(exerciseTreatment(catalogExercise('leg_press'), lightLowerBack)).toBe('light');
+    expect(exerciseTreatment(catalogExercise('goblet_squat'), lightLowerBack)).toBe('light');
+    expect(exerciseTreatment(catalogExercise('leg_curl'), lightLowerBack)).toBe('normal');
   });
 
   it('drops a main lift or barbell lift that loads a light area (D47)', () => {
     const lightShoulder = profile({ lightAreas: ['shoulder'] });
-    expect(exerciseTreatment(fixtureExercise('bench_press'), lightShoulder)).toBe('excluded');
-    expect(exerciseTreatment(fixtureExercise('overhead_press'), lightShoulder)).toBe('excluded');
-    expect(exerciseTreatment(fixtureExercise('barbell_row'), lightShoulder)).toBe('excluded');
+    expect(exerciseTreatment(catalogExercise('bench_press'), lightShoulder)).toBe('excluded');
+    expect(exerciseTreatment(catalogExercise('overhead_press'), lightShoulder)).toBe('excluded');
+    expect(exerciseTreatment(catalogExercise('barbell_row'), lightShoulder)).toBe('excluded');
     const lightLowerBack = profile({ lightAreas: ['lower_back'] });
-    expect(exerciseTreatment(fixtureExercise('back_squat'), lightLowerBack)).toBe('excluded');
-    expect(exerciseTreatment(fixtureExercise('romanian_deadlift'), lightLowerBack)).toBe(
+    expect(exerciseTreatment(catalogExercise('back_squat'), lightLowerBack)).toBe('excluded');
+    expect(exerciseTreatment(catalogExercise('romanian_deadlift'), lightLowerBack)).toBe(
       'excluded',
     );
   });
 
   it('never trains around an area light: an exercise loading an avoided area stays out', () => {
     const mixed = profile({ avoidAreas: ['knee'], lightAreas: ['shoulder'] });
-    expect(exerciseTreatment(fixtureExercise('dumbbell_bench_press'), mixed)).toBe('light');
-    expect(exerciseTreatment(fixtureExercise('leg_curl'), mixed)).toBe('excluded');
+    expect(exerciseTreatment(catalogExercise('dumbbell_bench_press'), mixed)).toBe('light');
+    expect(exerciseTreatment(catalogExercise('leg_curl'), mixed)).toBe('excluded');
     const both = profile({ avoidAreas: ['wrist'], lightAreas: ['wrist'] });
-    expect(exerciseTreatment(fixtureExercise('dumbbell_curl'), both)).toBe('excluded');
+    expect(exerciseTreatment(catalogExercise('dumbbell_curl'), both)).toBe('excluded');
   });
 });
 
 describe('buildPlan', () => {
   it('gives a new lifter two full-body workouts of 2 sets, 8-10 reps, 4 in reserve', () => {
-    const plan = buildPlan(profile({ experience: 'new', daysPerWeek: 3 }), FIXTURE_CATALOG);
+    const plan = buildPlan(profile({ experience: 'new', daysPerWeek: 3 }), CATALOG);
     expect(plan.split).toBe('full_body');
     expect(plan.daysPerWeek).toBe(3);
     expect(slugsByDay(plan)).toEqual({
@@ -115,7 +115,7 @@ describe('buildPlan', () => {
   });
 
   it('numbers positions from 1 within each day', () => {
-    const plan = buildPlan(profile({ experience: 'new' }), FIXTURE_CATALOG);
+    const plan = buildPlan(profile({ experience: 'new' }), CATALOG);
     expect(plan.items.filter((i) => i.dayLabel === 'A').map((i) => i.position)).toEqual([
       1, 2, 3, 4, 5,
     ]);
@@ -125,7 +125,7 @@ describe('buildPlan', () => {
   });
 
   it('gives an experienced lifter on 6 days push/pull/legs with the deadlift, 3 sets of 6-8', () => {
-    const plan = buildPlan(profile({ experience: 'experienced', daysPerWeek: 6 }), FIXTURE_CATALOG);
+    const plan = buildPlan(profile({ experience: 'experienced', daysPerWeek: 6 }), CATALOG);
     expect(plan.split).toBe('push_pull_legs');
     expect(plan.daysPerWeek).toBe(6);
     expect(slugsByDay(plan)).toEqual({
@@ -139,7 +139,7 @@ describe('buildPlan', () => {
   });
 
   it('gives an experienced lifter on 4 days upper/lower', () => {
-    const plan = buildPlan(profile({ experience: 'experienced', daysPerWeek: 4 }), FIXTURE_CATALOG);
+    const plan = buildPlan(profile({ experience: 'experienced', daysPerWeek: 4 }), CATALOG);
     expect(plan.split).toBe('upper_lower');
     expect(slugsByDay(plan)).toEqual({
       A: [
@@ -163,7 +163,7 @@ describe('buildPlan', () => {
   it('never moves a new lifter with an intense goal to the experienced row (D15)', () => {
     const plan = buildPlan(
       profile({ experience: 'new', goalIntensity: 'intense', daysPerWeek: 6 }),
-      FIXTURE_CATALOG,
+      CATALOG,
     );
     expect(plan.split).toBe('full_body');
     expect(plan.daysPerWeek).toBe(3);
@@ -171,10 +171,7 @@ describe('buildPlan', () => {
   });
 
   it('fills the dumbbells-only vertical pull with a second row (D43)', () => {
-    const plan = buildPlan(
-      profile({ equipment: 'dumbbells_only', daysPerWeek: 3 }),
-      FIXTURE_CATALOG,
-    );
+    const plan = buildPlan(profile({ equipment: 'dumbbells_only', daysPerWeek: 3 }), CATALOG);
     expect(plan.split).toBe('upper_lower');
     expect(slugsByDay(plan)).toEqual({
       A: [
@@ -197,7 +194,7 @@ describe('buildPlan', () => {
   it('trains a light area with light exercises and drops the barbell or main lift', () => {
     const plan = buildPlan(
       profile({ experience: 'experienced', daysPerWeek: 2, lightAreas: ['shoulder'] }),
-      FIXTURE_CATALOG,
+      CATALOG,
     );
     expect(plan.split).toBe('full_body');
     expect(slugsByDay(plan)).toEqual({
@@ -229,10 +226,7 @@ describe('buildPlan', () => {
   });
 
   it('keeps a light lower-back exercise where the avoided version would leave the slot empty', () => {
-    const light = buildPlan(
-      profile({ daysPerWeek: 2, lightAreas: ['lower_back'] }),
-      FIXTURE_CATALOG,
-    );
+    const light = buildPlan(profile({ daysPerWeek: 2, lightAreas: ['lower_back'] }), CATALOG);
     expect(slugsByDay(light)).toEqual({
       A: ['leg_press', 'bench_press', 'lat_pulldown', 'leg_curl', 'dumbbell_curl'],
       B: [
@@ -245,10 +239,7 @@ describe('buildPlan', () => {
     });
     expect(lightSlugs(light)).toEqual(['leg_press', 'dumbbell_romanian_deadlift']);
 
-    const avoided = buildPlan(
-      profile({ daysPerWeek: 2, avoidAreas: ['lower_back'] }),
-      FIXTURE_CATALOG,
-    );
+    const avoided = buildPlan(profile({ daysPerWeek: 2, avoidAreas: ['lower_back'] }), CATALOG);
     expect(slugsByDay(avoided)).toEqual({
       A: ['bench_press', 'lat_pulldown', 'leg_curl', 'dumbbell_curl'],
       B: [
@@ -262,7 +253,7 @@ describe('buildPlan', () => {
   });
 
   it('skips the slots an avoided area empties and keeps the plan valid', () => {
-    const plan = buildPlan(profile({ avoidAreas: ['shoulder'] }), FIXTURE_CATALOG);
+    const plan = buildPlan(profile({ avoidAreas: ['shoulder'] }), CATALOG);
     expect(plan.split).toBe('full_body');
     expect(slugsByDay(plan)).toEqual({
       A: ['back_squat', 'leg_curl', 'dumbbell_curl'],
@@ -275,10 +266,7 @@ describe('buildPlan', () => {
   });
 
   it('uses 10-12 reps for a new lifter with an area to avoid', () => {
-    const plan = buildPlan(
-      profile({ experience: 'new', avoidAreas: ['shoulder'] }),
-      FIXTURE_CATALOG,
-    );
+    const plan = buildPlan(profile({ experience: 'new', avoidAreas: ['shoulder'] }), CATALOG);
     expect(plan.items.length).toBeGreaterThan(0);
     for (const item of plan.items) {
       expect([item.sets, item.repMin, item.repMax, item.rir]).toEqual([2, 10, 12, 4]);
@@ -286,7 +274,7 @@ describe('buildPlan', () => {
   });
 
   it('returns an empty plan, not an error, when every area is avoided', () => {
-    const plan = buildPlan(profile({ avoidAreas: [...REGIONS] }), FIXTURE_CATALOG);
+    const plan = buildPlan(profile({ avoidAreas: [...REGIONS] }), CATALOG);
     expect(plan.items).toEqual([]);
     expect(nextDayLabel(plan, null)).toBeNull();
     expect(nextDayLabel(plan, 'A')).toBeNull();
@@ -294,8 +282,8 @@ describe('buildPlan', () => {
 
   it('drops a workout with no exercises and relabels the rest from A', () => {
     const catalog = [
-      fixtureExercise('romanian_deadlift'),
-      fixtureExercise('dumbbell_reverse_lunge'),
+      catalogExercise('romanian_deadlift'),
+      catalogExercise('dumbbell_reverse_lunge'),
     ];
     const plan = buildPlan(profile({ experience: 'new' }), catalog);
     expect(slugsByDay(plan)).toEqual({ A: ['romanian_deadlift', 'dumbbell_reverse_lunge'] });
@@ -304,14 +292,14 @@ describe('buildPlan', () => {
   });
 
   it('does not mutate the catalog', () => {
-    const before = FIXTURE_CATALOG.map((e) => e.slug);
-    buildPlan(profile({ experience: 'experienced', daysPerWeek: 6 }), FIXTURE_CATALOG);
-    expect(FIXTURE_CATALOG.map((e) => e.slug)).toEqual(before);
+    const before = CATALOG.map((e) => e.slug);
+    buildPlan(profile({ experience: 'experienced', daysPerWeek: 6 }), CATALOG);
+    expect(CATALOG.map((e) => e.slug)).toEqual(before);
   });
 });
 
 describe('nextDayLabel', () => {
-  const plan = buildPlan(profile({ experience: 'experienced', daysPerWeek: 6 }), FIXTURE_CATALOG);
+  const plan = buildPlan(profile({ experience: 'experienced', daysPerWeek: 6 }), CATALOG);
 
   it('starts at the first label when nothing is recorded', () => {
     expect(nextDayLabel(plan, null)).toBe('A');
@@ -336,7 +324,7 @@ describe('nextDayLabel', () => {
   });
 
   it('alternates A and B for full body', () => {
-    const fullBody = buildPlan(profile({ experience: 'new' }), FIXTURE_CATALOG);
+    const fullBody = buildPlan(profile({ experience: 'new' }), CATALOG);
     expect(nextDayLabel(fullBody, 'A')).toBe('B');
     expect(nextDayLabel(fullBody, 'B')).toBe('A');
   });
