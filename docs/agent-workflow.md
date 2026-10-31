@@ -4,7 +4,8 @@ This guide is for the owner. It explains how AI agents build Saebom from §14 of
 
 ## How it fits together
 
-- **Agents write the code; you review, test and merge (D58).** Each task runs in Claude Code on your Mac, in its own git worktree, and ends in one pull request (D60, D62).
+- **Agents write the code; you review, test and merge (D58).** Each task runs in Claude Code on your Mac, in its own git worktree, and ends in one pull request (D60).
+- **Two lanes, one pull request per lane per day (D68–D71).** The app lane builds `app/`, and the backend lane builds everything else. A session takes its lane's earliest §14 day and finishes all of that day's items in its lane in one pull request, one commit per item. Items labeled **Owner:** are yours.
 - **pstack shapes how an agent works (D59).** Starting a task with `/pstack:poteto-mode` makes the agent restate the goal, pick a playbook, test first, prove the change works and write a clear PR. pstack is poteto's skill pack, and Claude Code installs it from `.claude/settings.json` when you trust the folder.
 - **A second model reviews every PR (D63).** Gemini reviews Claude's PRs through Antigravity CLI, and Claude reviews Gemini's. The agent checks each finding and posts the result on the PR before you look.
 - **Questions come to you as issues (D61).** When the spec doesn't say what the app should do, the agent opens a GitHub issue labeled `question` and keeps working on what it can. Your answer becomes a numbered decision in the next PR.
@@ -36,24 +37,36 @@ Do this once, in order. It takes about 45 minutes.
 ## The loop for each task
 
 1. **Update `main`:** `cd ~/Development/saebom && git switch main && git pull`.
-2. **Start a session in a new worktree:** `claude -w <topic>`, such as `claude -w day1-migrations`.
-3. **Give the task:**
+2. **Start a session per lane, each in a new worktree:** `claude -w <topic>`, such as `claude -w app-day3` and `claude -w backend-day3`. The autopilot does this and the next step for you.
+3. **Give the task**, with `app` or `backend`:
 
    ```
-   /pstack:poteto-mode Take the next task from §14 of docs/HANDOFF.md: <the item, or "the first unchecked one">.
-   One PR, then run the second-review skill. Stop when the PR is ready for my review.
+   /pstack:poteto-mode You work the backend lane (D69). Take the earliest day in §14 of docs/HANDOFF.md
+   that has unchecked **Backend:** items, and do all of that day's Backend items in one PR, one commit
+   per item. Then run the second-review skill. Stop when the PR is ready for my review.
    ```
 
 4. **The agent works.** It restates the goal, works test-first, runs `npm run verify`, renames the branch (`git branch -m feat/<topic>`), opens the PR, runs the Gemini second review, fixes the findings it confirms and posts the review as a comment. Questions it can't settle go to issues as it goes.
-5. **You review.** Read the PR's description and the second-review comment, then the diff. If the PR changes the app, check out the branch and try it on the iPhone (`npm --prefix app run ios:device`). Ask for changes in the same session, or merge (squash) on GitHub.
-6. **Do the production steps yourself:** `db push`, `functions deploy`, secrets, invites and builds (`CLAUDE.md`, "Owner only").
+5. **You review, as closely as the PR asks** (see [How closely to review](#how-closely-to-review)). Read the PR's description and the second-review comment, then the diff. Ask for changes in the same session, or merge on GitHub.
+6. **Do the production steps yourself:** `db push`, `functions deploy`, secrets, invites and builds (`CLAUDE.md`, "Owner only"), plus the **Owner:** items in §14.
 7. **Close the session and remove the worktree once its PR is merged.** Claude Code asks whether to keep the worktree when you exit; you can also run `git worktree remove .claude/worktrees/<topic>`.
 
-A second session can run at the same time when its task touches different files, such as tests or docs while the first builds a screen. On Claude Pro, two sessions at once is the ceiling (D60).
+The two lanes are the two sessions Claude Pro allows at once (D60), so don't start a third alongside them. The lanes rarely touch the same files. When one lane needs the other's unmerged work, its session builds against the handoff's contract and says so in the PR, so merge the side it depends on first.
 
-## Autopilot: the next task starts when you merge (D67)
+## How closely to review
 
-The autopilot runs steps 1–3 of the loop for you. You keep reviewing and merging, and the next task starts about a minute after each merge.
+Each PR ends with a `Review:` line and an `iPhone:` line (D70).
+
+- **`Review: careful (<why>)`:** migrations and pgTAP tests, `_shared/rules`, `_shared/coach`, Edge Functions, auth, the Keychain, the app lock, consent, injured areas and light training, and anything on `CLAUDE.md`'s "Never" list. Read these line by line; they're where a mistake reaches a tester.
+- **`Review: light`:** everything else, such as docs, CI, config, theme and animations. Skim the description, the second review and the diff, then merge once CI is green.
+- **`iPhone: now`:** behavior only a device shows (the Keychain, Face ID, notifications, the timer in the background). Install the branch (`npm --prefix app run ios:device`) before merging.
+- **`iPhone: next milestone`:** merge after review, and test it with the rest at the next milestone.
+
+Test on the iPhone from `main` at these milestones: after day 3 (invite sign-in with MFA), the day 5 milestone (a calibration pass logged, with next targets), after day 6 (reminders and the app lock) and on day 10 (the TestFlight build). Fix what you find in the next PR of the lane that owns it.
+
+## Autopilot: each lane's next task starts when you merge (D67, D69)
+
+The autopilot runs steps 1–3 of the loop for you, for both lanes. You keep reviewing and merging, and each lane's next task starts about a minute after a merge.
 
 1. **Start it** in its own Terminal window, from your main checkout:
 
@@ -62,23 +75,23 @@ The autopilot runs steps 1–3 of the loop for you. You keep reviewing and mergi
    npm run autopilot
    ```
 
-2. **Leave that window open.** Every minute it checks GitHub. When `main` gets a new commit (your merge), no pull request is open and no session it started is still running, it updates your main checkout and opens a new Terminal window running `claude -w next-<date-time>` with the next-task prompt. That session works like one you started by hand: you can watch it and answer its prompts, and the guard and second review still apply.
+2. **Leave that window open.** Every minute it checks GitHub. When `main` gets a new commit (your merge), it updates your main checkout and, for each lane that still has unchecked items, no open pull request and no running session, opens a new Terminal window running `claude -w next-<lane>-<date-time>` with that lane's prompt. A PR's lane comes from its `Lane:` line; a PR without one, such as a docs change you asked for, holds both lanes until you merge or close it. Each session works like one you started by hand: you can watch it and answer its prompts, and the guard and second review still apply.
 3. **Follow along in its log.** It prints a timestamped line, and shows a Mac notification, when:
-   - a pull request opens;
+   - a pull request opens, with its lane;
    - a second review is posted, which means the PR is ready for your review;
    - a question issue needs your answer;
    - `main` moves after a merge;
-   - it starts a task, or why it's waiting instead (a PR still open, or a session still running).
-4. **Use the keys** in its window: **Enter** starts a task now if no pull request is open and no session is running, **f** starts one anyway, **s** shows the status, **q** quits. It never starts two tasks within 2 minutes, and anything typed while it's busy checking GitHub is discarded, so don't type commands into its window. It also stops when every §14 item is ticked.
-5. **When you restart it,** it prints `Watching main at …` and `Waiting for your next merge`, then stays quiet until something happens. A merge made while it was stopped starts a task on the next check; otherwise press Enter to start one.
+   - it starts a lane's task, or why a lane is waiting instead (its PR still open, its session still running, or nothing left in it).
+4. **Use the keys** in its window: **Enter** starts every lane that can start; **f** then **a** or **b** starts the app or backend lane anyway, even with its PR open or its session running; **s** shows the status, including how many app, backend and owner items are left; **q** quits. It never starts the same lane twice within 2 minutes, and anything typed while it's busy checking GitHub is discarded, so don't type commands into its window. It stops when every **App:** and **Backend:** item is ticked, and the **Owner:** items left are yours.
+5. **When you restart it,** it prints `Watching main at …` and `Waiting for your next merge`, then stays quiet until something happens. A merge made while it was stopped starts tasks on the next check; otherwise press Enter.
 
 What to know:
 
-- **It never merges, pushes or touches production.** It only opens the session you'd open by hand, and your production steps after a merge stay yours.
-- **If the Mac sleeps, it pauses** and catches up when the Mac wakes. A merge made while it was stopped starts a task the next time you run it.
-- **It uses your Claude Pro limits faster,** since nothing waits between tasks. When a session hits the limit, finish that task in Antigravity as usual (see below); the autopilot waits until that PR is merged.
+- **It never merges, pushes or touches production.** It only opens the sessions you'd open by hand, and your production steps after a merge stay yours.
+- **If the Mac sleeps, it pauses** and catches up when the Mac wakes. A merge made while it was stopped starts tasks the next time you run it.
+- **Two lanes use your Claude Pro limits about twice as fast.** When a session hits the limit, finish that task in Antigravity as usual (see below); its lane waits until that PR is merged, and the other lane keeps going. If both lanes keep hitting the limit, run one lane at a time: `AUTOPILOT_LANES=backend npm run autopilot` (or `app`).
 - **The first notification** may ask you to allow notifications for Script Editor, which macOS uses to show them. Allow them in System Settings → Notifications if you want the banners.
-- **To try it without opening sessions,** run `AUTOPILOT_DRY_RUN=1 npm run autopilot`: it prints the session it would open instead.
+- **To try it without opening sessions,** run `AUTOPILOT_DRY_RUN=1 npm run autopilot`: it prints the sessions it would open instead.
 
 ## Questions and decisions
 
