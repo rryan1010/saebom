@@ -39,7 +39,7 @@ const paths = {
       'signedIn',
     ),
   ],
-  'reset: code, challenge, set password, app': [
+  'reset (D72): code, challenge, set password, app': [
     step('before signing in', { hasSession: false }, 'signedOut'),
     step('code verified', { ...base, hasVerifiedTotp: true }, 'needsChallenge'),
     step(
