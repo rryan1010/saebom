@@ -443,21 +443,21 @@ Onboarding offers two equipment setups: full gym, or dumbbells only (dumbbells p
 
 Tests to write before building screens:
 
-- [ ] Every profile row produces a plan within its day, set and rep limits; no rep range goes above 12.
-- [ ] A tester with no injured area and 6 months or more of experience gets 6–8 on every exercise, main lifts included; a new lifter with no injured area gets 8–10; and nobody without an injured area gets a rep range above 10 (D48).
-- [ ] A new lifter with an intense goal never gets the experienced row; areas to avoid beat every other row.
-- [ ] No plan contains an exercise that loads an area being trained around, including after the areas or choices change.
-- [ ] When avoided areas or the equipment setup rule out every exercise in a movement pattern, the plan skips that slot (or uses D43's row) and stays valid.
-- [ ] Every allowed swap names an existing exercise with the same movement pattern and never a main lift; every compound lift has at least one swap (D41, D54).
-- [ ] Avoiding an area leaves out exercises that load it great or light; training it light keeps both (D51).
-- [ ] A new lifter's plan never contains the deadlift (D52).
-- [ ] A light exercise is never a main lift or a barbell lift, never loads an area being trained around, always has 2 sets of 10–12, and goes up in weight only when every set hit 12 reps and none felt hard.
-- [ ] "Train it light" can't be saved until the warning has been acknowledged (`light_ack_at`).
-- [ ] No readiness answer stops a plan from being built once the warning is acknowledged (D49).
-- [ ] A "Go lighter today" session leaves targets unchanged; "Lower my targets" drops one increment at most and never below the minimum load (D50).
-- [ ] Progression never raises a weight by more than one increment per session.
-- [ ] Property tests (fast-check): random profiles and logs never produce a weight that is negative, below the exercise's minimum load or not a multiple of its increment.
-- [ ] Lighter weeks never land fewer than 4 weeks apart.
+- [x] Every profile row produces a plan within its day, set and rep limits; no rep range goes above 12.
+- [x] A tester with no injured area and 6 months or more of experience gets 6–8 on every exercise, main lifts included; a new lifter with no injured area gets 8–10; and nobody without an injured area gets a rep range above 10 (D48).
+- [x] A new lifter with an intense goal never gets the experienced row; areas to avoid beat every other row.
+- [x] No plan contains an exercise that loads an area being trained around, including after the areas or choices change.
+- [x] When avoided areas or the equipment setup rule out every exercise in a movement pattern, the plan skips that slot (or uses D43's row) and stays valid.
+- [x] Every allowed swap names an existing exercise with the same movement pattern and never a main lift; every compound lift has at least one swap (D41, D54).
+- [x] Avoiding an area leaves out exercises that load it great or light; training it light keeps both (D51).
+- [x] A new lifter's plan never contains the deadlift (D52).
+- [x] A light exercise is never a main lift or a barbell lift, never loads an area being trained around, always has 2 sets of 10–12, and goes up in weight only when every set hit 12 reps and none felt hard.
+- [x] "Train it light" can't be saved until the warning has been acknowledged (`light_ack_at`).
+- [x] No readiness answer stops a plan from being built once the warning is acknowledged (D49).
+- [x] A "Go lighter today" session leaves targets unchanged; "Lower my targets" drops one increment at most and never below the minimum load (D50).
+- [x] Progression never raises a weight by more than one increment per session.
+- [x] Property tests (fast-check): random profiles and logs never produce a weight that is negative, below the exercise's minimum load or not a multiple of its increment.
+- [x] Lighter weeks never land fewer than 4 weeks apart.
 
 ## 8. Workout session
 
@@ -866,7 +866,7 @@ All items are open; build work hadn't started by Oct 28, the date of day 3. Days
 **Day 2 · Tue, Oct 27 · Plan engine**
 
 - [x] **Backend:** `_shared/rules`: profile rows and precedence (6–8 baseline, 8–10 for new lifters, D48), splits, exercise filters (avoided areas great or light, D51; no deadlift for new lifters, D52), light exercises (D47), the weight formula, progression with the comfort choices (D50) and lighter weeks. **Plan building done Oct 30** (profile rows, splits, filters, light exercises, the weight formula; workout contents and set counts run on defaults pending #12 and #13). **Progression, comfort choices and lighter weeks done Oct 30** (what counts as below the range and how half the sets rounds run on defaults pending #15 and #16).
-- [ ] **Backend:** The unit and property tests from §7.
+- [x] **Backend:** The unit and property tests from §7.
 - [ ] **Backend:** The exercise catalog seed from the reviewed draft: 25 exercises with graded labels, swaps and cues (§7, D51–D54).
 - [ ] **Backend:** The rep-record trigger and `record_session`, with `execute` revoked from app roles.
 - [ ] **App:** Spike: the app imports `_shared/rules` through Metro.
