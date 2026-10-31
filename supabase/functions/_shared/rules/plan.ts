@@ -108,7 +108,7 @@ export function buildPlan(profile: Profile, catalog: readonly Exercise[]): Plan 
 
 /** The label after `lastDayLabel` in the plan's order, wrapping; the first when it is unknown. */
 export function nextDayLabel(plan: Plan, lastDayLabel: string | null): string | null {
-  const labels = [...new Set(plan.items.map((item) => item.dayLabel))];
+  const labels = [...new Set(plan.items.map((item) => item.dayLabel))].sort();
   if (lastDayLabel === null) return labels[0] ?? null;
   const at = labels.indexOf(lastDayLabel);
   return labels[(at + 1) % labels.length] ?? null;

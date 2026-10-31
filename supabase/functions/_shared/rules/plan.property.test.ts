@@ -24,10 +24,14 @@ const profileArb: fc.Arbitrary<Profile> = fc
     goalIntensity: fc.constantFrom(...GOAL_INTENSITY),
     daysPerWeek: fc.integer({ min: 2, max: 6 }),
     equipment: fc.constantFrom(...EQUIPMENT_SETUPS),
-    statuses: fc.array(fc.constantFrom('none', 'avoid', 'light'), {
-      minLength: REGIONS.length,
-      maxLength: REGIONS.length,
-    }),
+    // Half the runs flag no area, so the uninjured rows and D48's baseline get real coverage.
+    statuses: fc.oneof(
+      fc.constant(REGIONS.map(() => 'none')),
+      fc.array(fc.constantFrom('none', 'avoid', 'light'), {
+        minLength: REGIONS.length,
+        maxLength: REGIONS.length,
+      }),
+    ),
   })
   .map(({ statuses, ...rest }) => ({
     ...rest,

@@ -328,6 +328,13 @@ describe('nextDayLabel', () => {
     expect(nextDayLabel(plan, 'Z')).toBe('A');
   });
 
+  it('rotates in label order whatever order the items arrive in', () => {
+    const shuffled = { ...plan, items: [...plan.items].reverse() };
+    expect(nextDayLabel(shuffled, null)).toBe('A');
+    expect(nextDayLabel(shuffled, 'A')).toBe('B');
+    expect(nextDayLabel(shuffled, 'C')).toBe('A');
+  });
+
   it('alternates A and B for full body', () => {
     const fullBody = buildPlan(profile({ experience: 'new' }), FIXTURE_CATALOG);
     expect(nextDayLabel(fullBody, 'A')).toBe('B');
