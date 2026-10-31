@@ -28,4 +28,4 @@ The project skills live in `.claude/skills/`. Open each one by path when it appl
 
 ## Pull requests
 
-Put `Agent: Antigravity CLI · <model>` in the PR body. Claude reviews your PRs once its limits reset, and the owner merges after that review.
+Put `Agent: Antigravity CLI · <model>` in the PR body, and keep the `Lane:`, `Review:` and `iPhone:` lines `CLAUDE.md` asks for (D69, D70); the autopilot reads `Lane:`. Claude reviews your PRs once its limits reset, and the owner merges after that review.

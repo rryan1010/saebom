@@ -6,10 +6,10 @@ Handoff map: §3 decisions · §6 data model and RLS · §7 plan engine · §8 s
 
 ## Working agreement
 
-- **Agents write the code; the owner reviews, tests on the iPhone and merges (D58).** Agents never merge, approve their own work or touch production.
+- **Agents write the code; the owner reviews, tests on the iPhone at milestones and merges (D58, D70).** Agents never merge, approve their own work or touch production.
 - **pstack is the agent framework (D59).** Start any task that touches more than one file, makes a design choice or chases a bug of unknown cause with `/pstack:poteto-mode`. Where pstack and this file disagree, this file wins.
-- **Pick work from §14.** The next task is the first unchecked item in §14 that no open PR covers. Split a large item into PR-sized tasks, and tick the item in the PR that finishes it.
-- **One task, one worktree, one PR (D60, D62).** Each session runs in its own git worktree (`claude -w <topic>`) on the owner's Mac, at most two sessions at a time.
+- **Pick work from §14, in your lane (D69, D71).** Work runs in two lanes: **app** (`app/`) and **backend** (everything else). Your task is the earliest §14 day with unchecked items labeled for your lane (**App:** or **Backend:**) that no open PR covers: do all of that day's items in your lane, and when that's small, the next day's too. Never take **Owner:** items. Split an item that spans lanes into one per lane in the handoff. When an item needs the other lane's work that isn't on `main` yet, build against the handoff's contract and say so under Scope.
+- **One lane's day, one worktree, one PR (D60, D68).** Each session runs in its own git worktree (`claude -w <topic>`) on the owner's Mac, at most two sessions at a time, one per lane. Make one commit per §14 item and tick the item in that commit. Past about 1,500 changed lines (not counting lockfiles, generated types or seed data), stop at an item boundary and open the PR.
 - **Questions go to the owner as issues (D61).** A product or preference question that the handoff doesn't answer and no experiment can settle goes through the **ask-owner** skill. Keep working on whatever the question doesn't block.
 - **Decisions are logged in the same PR (D40, D61).** Run the **log-decision** skill when the owner answers a question or changes a requirement.
 - **Every PR gets a second review from the other model family (D63).** Run the **second-review** skill before handing a PR to the owner.
@@ -76,7 +76,7 @@ The app imports `_shared/` through Metro (`watchFolders` in `metro.config.js`), 
 - **SQL:** lowercase keywords; plural `snake_case` tables; `snake_case` columns with unit suffixes (`weight_lb`, `duration_s`) and `_at` timestamps; schema-qualified names (`public.set_logs`); policies named in plain words ("read own").
 - **Data identifiers:** exercise slugs in `snake_case` (`lat_pulldown`); audit actions in `snake_case` past tense (`session_recorded`).
 - **Git (D62):** branches `<type>/<topic>`, with the Conventional Commits types `feat`, `fix`, `test`, `refactor`, `docs`, `chore` and `ci`. Claude Code names a worktree's branch `worktree-<name>`, so rename it before the first push (`git branch -m feat/plan-engine`). Conventional Commits for every commit and every PR title (`feat(plan): add lighter-week rule`). One PR per task.
-- **PR body:** pstack's opening-a-pr format (Why, What changed, Scope, Blast Radius, Verification), plus these lines at the end: the §14 item it covers; `Decisions: D<n>` and `Closes #<issue>` when it logs an answer; `Open questions: #<issue>` when it runs on a default; `Agent: Claude Code · <model>` or `Agent: Antigravity CLI · <model>`; and the second-review comment link.
+- **PR body:** pstack's opening-a-pr format (Why, What changed, Scope, Blast Radius, Verification), plus these lines at the end: the §14 item it covers; `Decisions: D<n>` and `Closes #<issue>` when it logs an answer; `Open questions: #<issue>` when it runs on a default; `Lane: app` or `Lane: backend` (the autopilot reads it, D69); `Review: careful (<why>)` when the PR touches migrations or pgTAP tests, `_shared/rules`, `_shared/coach`, an Edge Function, auth, the Keychain, the app lock, consent, injured areas or light training, or anything on the "Never" list, and `Review: light` otherwise; `iPhone: now` for behavior only a device shows (the Keychain, Face ID, notifications, the timer in the background), `iPhone: next milestone` for other app changes, or `iPhone: not needed` (D70); `Agent: Claude Code · <model>` or `Agent: Antigravity CLI · <model>`; and the second-review comment link.
 
 ## Commands
 
@@ -145,7 +145,7 @@ gh issue create --label question --title "Q: <question>" --body-file <file>   # 
 Owner only, never an agent:
 
 ```bash
-npm run autopilot                              # scripts/agents/autopilot.sh: opens the next task's session after each merge (D67)
+npm run autopilot                              # scripts/agents/autopilot.sh: after each merge, opens each lane's next session (D67, D69)
 npm run invite -- friend@example.com           # node --env-file=scripts/.env.local scripts/invite.ts
 npm run invite -- --reset friend@example.com   # one-time code for a password reset
 npx supabase db push --dry-run                 # then: npx supabase db push
@@ -165,5 +165,5 @@ npm --prefix app run submit:ios                # eas submit --platform ios --pat
 4. No secrets or health data in code, logs, notifications, audit events or prompts.
 5. The app writes only `profiles` and `consents`; functions validate input and check `aal2`.
 6. Rings, buttons and motion meet the accessibility rules.
-7. Scope matches one §14 task, anything new is logged in §3, and this file is updated if a command or convention changed.
+7. Scope matches one lane's §14 day (or two small ones), every item it finishes is ticked, anything new is logged in §3, and this file is updated if a command or convention changed.
 8. The second review is posted, and every confirmed finding is fixed or listed for the owner (D63).
