@@ -1,5 +1,6 @@
 export type Scheme = 'dark' | 'light';
-export type ColorRole = 'background' | 'surface' | 'text' | 'textSecondary' | 'accent' | 'onAccent';
+export type ColorRole =
+  'background' | 'surface' | 'text' | 'textSecondary' | 'accent' | 'onAccent' | 'border' | 'danger';
 
 // accent and onAccent are defaults until the owner answers #7
 export const COLORS = {
@@ -10,6 +11,8 @@ export const COLORS = {
     textSecondary: '#A3ABA6',
     accent: '#3DDC84',
     onAccent: '#06140C',
+    border: '#2C322E',
+    danger: '#FF8A80',
   },
   light: {
     background: '#FFFFFF',
@@ -18,6 +21,8 @@ export const COLORS = {
     textSecondary: '#4F5752',
     accent: '#0F7A3D',
     onAccent: '#FFFFFF',
+    border: '#D5DBD7',
+    danger: '#B3261E',
   },
 } as const satisfies Record<Scheme, Record<ColorRole, string>>;
 
