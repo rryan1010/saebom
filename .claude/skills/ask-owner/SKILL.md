@@ -9,13 +9,13 @@ The owner makes product calls; agents don't guess them. A GitHub issue reaches t
 
 ## Before you ask
 
-1. Search the spec and earlier questions. Read `docs/HANDOFF.md` §3 (decisions) and the sections for the feature, then run `gh issue list --label question --state all --search "<keywords>"`. If the answer exists, follow it.
+1. Search the spec and earlier questions. Read `docs/HANDOFF.md` §3 (decisions) and the sections for the feature, then run `gh issue list --label question --state all --search "<keywords>"` (in a cloud session, `gh api -X GET search/issues -f q='repo:rryan1010/saebom label:question <keywords>'`, D75). If the answer exists, follow it.
 2. If running something could settle it (behavior, layout, timing, performance), run the experiment instead, as pstack's Prototype playbook does. Ask only what the app should do or what the owner prefers.
 
 ## Ask
 
 Write the body to a temp file under these headings, then run
-`gh issue create --label question --title "Q: <the question in one line>" --body-file <file>`:
+`gh issue create --label question --title "Q: <the question in one line>" --body-file <file>`. In a cloud session, `gh issue create` can't write (D75), so create the same issue, with the `question` label, through the GitHub connector:
 
 ```
 ### Question

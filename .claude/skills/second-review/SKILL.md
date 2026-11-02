@@ -7,7 +7,7 @@ description: Have every Saebom pull request reviewed by the other model family b
 
 A reviewer from another model family catches what the author's model misses. Only findings you've checked reach the owner.
 
-**Until Nov 4 (D74):** the second review is a separate Claude Code cloud session on Opus 5.5 at max effort, which the owner starts. It checks each finding against the code and posts the verified ones as one PR comment, in the format of step 4 with `Claude Opus 5.5 (max effort, cloud)` as the reviewer. A cloud coding session opens its PR and stops. The Gemini review below is the fallback when Claude's limits run out, and applies again as written after Nov 4.
+**Until Nov 4 (D74):** the second review is a separate Claude Code cloud session on Opus 5.5 at max effort, which the owner starts. It checks each finding against the code and posts the verified ones as one PR comment, in the format of step 4 with `Claude Opus 5.5 (max effort, cloud)` as the reviewer. It reads the diff with `gh pr diff <n>` and posts the comment with the GitHub connector, because `gh pr comment` can't write from the cloud (D75). A cloud coding session opens its PR and stops. The Gemini review below is the fallback when Claude's limits run out, and applies again as written after Nov 4.
 
 ## Who reviews
 
