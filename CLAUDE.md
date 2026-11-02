@@ -124,6 +124,7 @@ Test and check (everything passes before every PR):
 ```bash
 npm test                         # vitest run: plan engine and coach checker, unit and property tests
 npm run test:db                  # supabase test db: pgTAP RLS tests
+npm run test:auth                # node --test scripts/check-auth.ts: invite-only sign-up and the demo, through local Auth
 npm run lint:db                  # supabase db lint --fail-on error
 npm run check:functions          # deno check supabase/functions/*/index.ts supabase/functions/_shared/*/index.ts && deno lint supabase/functions
 npm --prefix app run typecheck   # tsc --noEmit

@@ -232,7 +232,8 @@ max_frequency = "1s"
 # Number of characters used in the email OTP.
 otp_length = 6
 # Number of seconds before the email OTP expires (defaults to 1 hour).
-otp_expiry = 3600
+# Invite and reset codes from the owner's script last a day, the most Auth allows (§11).
+otp_expiry = 86400
 
 # Use a production-ready SMTP server
 # [auth.email.smtp]
@@ -278,9 +279,11 @@ max_frequency = "5s"
 # inactivity_timeout = "8h"
 
 # This hook runs before a new user is created and allows developers to reject the request based on the incoming user object.
-# [auth.hook.before_user_created]
-# enabled = true
-# uri = "pg-functions://postgres/auth/before-user-created-hook"
+# Invite-only accounts (§11, D8): anonymous demo sign-ins and invited emails pass, every other
+# sign-up gets a 403. The migration that creates the function grants it to supabase_auth_admin.
+[auth.hook.before_user_created]
+enabled = true
+uri = "pg-functions://postgres/public/hook_invite_only"
 
 # This hook runs before a token is issued and allows you to add additional claims based on the authentication method used.
 # [auth.hook.custom_access_token]

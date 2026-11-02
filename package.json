@@ -5,6 +5,7 @@
   "scripts": {
     "test": "vitest run",
     "test:db": "supabase test db",
+    "test:auth": "node --test scripts/check-auth.ts",
     "lint:db": "supabase db lint --fail-on error",
     "check:functions": "deno check supabase/functions/*/index.ts supabase/functions/_shared/*/index.ts && deno lint supabase/functions",
     "format:check": "prettier --check .",
@@ -13,7 +14,7 @@
     "db:seed": "node scripts/seed-catalog.ts",
     "invite": "node --env-file=scripts/.env.local scripts/invite.ts",
     "autopilot": "scripts/agents/autopilot.sh",
-    "verify": "npm test && npm run test:db && npm run lint:db && npm run check:functions && npm --prefix app run typecheck && npm --prefix app run lint && npm run format:check && npm run test:agents"
+    "verify": "npm test && npm run test:db && npm run test:auth && npm run lint:db && npm run check:functions && npm --prefix app run typecheck && npm --prefix app run lint && npm run format:check && npm run test:agents"
   },
   "devDependencies": {
     "@types/node": "^24.19.2",
