@@ -1,6 +1,6 @@
 # Running Saebom's AI agents
 
-This guide is for the owner. It explains how AI agents build Saebom from §14 of `docs/HANDOFF.md` while you review and merge. The rules agents follow live in `CLAUDE.md`, and the decisions behind this workflow are D58–D65 in the handoff.
+This guide is for the owner. It explains how AI agents build Saebom from §14 of `docs/HANDOFF.md` while you review and merge. The rules agents follow live in `CLAUDE.md`, and the decisions behind this workflow are D58–D74 in the handoff. Until Nov 4, cloud sessions change parts of it; see [Cloud sessions until Nov 4](#cloud-sessions-until-nov-4-d73d74).
 
 ## How it fits together
 
@@ -10,7 +10,8 @@ This guide is for the owner. It explains how AI agents build Saebom from §14 of
 - **A second model reviews every PR (D63).** Gemini reviews Claude's PRs through Antigravity CLI, and Claude reviews Gemini's. The agent checks each finding and posts the result on the PR before you look.
 - **Questions come to you as issues (D61).** When the spec doesn't say what the app should do, the agent opens a GitHub issue labeled `question` and keeps working on what it can. Your answer becomes a numbered decision in the next PR.
 - **Guardrails hold whatever the agent decides (D65).** A guard hook and deny rules block production commands, pushes to `main`, merges, secret files and the rest of `CLAUDE.md`'s "Never" list.
-- **No extra spend (D64).** Everything runs on your Claude Pro and Google AI Pro subscriptions.
+- **No extra spend (D64).** Everything runs on your Claude Pro and Google AI Pro subscriptions, plus, until Nov 4, the free promotional cloud credit (D73).
+- **Cloud sessions until Nov 4 (D73–D74).** You can also start Claude Code cloud sessions, as many at once as you like, each on an item or a group of items, with an Opus 5.5 cloud session as the second reviewer.
 - **Noodle waits until after Nov 6 (D59).** See [Noodle, after Nov 6](#noodle-after-nov-6).
 
 ## One-time setup on the Mac
@@ -52,6 +53,29 @@ Do this once, in order. It takes about 45 minutes.
 7. **Close the session and remove the worktree once its PR is merged.** Claude Code asks whether to keep the worktree when you exit; you can also run `git worktree remove .claude/worktrees/<topic>`.
 
 The two lanes are the two sessions Claude Pro allows at once (D60), so don't start a third alongside them. The lanes rarely touch the same files. When one lane needs the other's unmerged work, its session builds against the handoff's contract and says so in the PR, so merge the side it depends on first.
+
+## Cloud sessions until Nov 4 (D73–D74)
+
+Until the promotional cloud credit runs out or expires (Nov 4), you can run agent tasks as Claude Code cloud sessions alongside, or instead of, the two lanes on the Mac.
+
+- **As many at once as you start.** Give each session one §14 item, or a few items you group, and tell it which lane (`Lane: app` or `Lane: backend`) and review depth the PR carries. It works under the same `CLAUDE.md`, opens one PR and stops.
+- **Cloud PRs don't tick §14.** Each names the items it finishes in its body. Once a day, tick the merged items yourself in one docs PR, or have a session do it.
+- **One PR at a time on the shared spots.** Only one open PR may change the route gate (`app/app/_layout.tsx` or `auth-state.ts`), and only one may add a migration or change `supabase/tests/schema_test.sql` (the DB lane). Don't start a second session on either until the first one's PR is merged or closed.
+- **Checks the cloud can't run come back to the Mac.** Each cloud PR lists them under Verification. Run the Simulator, the iPhone and any other listed check on the Mac before merging.
+- **The second review is a cloud session too (D74).** Start a cloud session on Opus 5.5 at max effort for each PR, for example:
+
+  ```
+  Second-review PR #<n> in rryan1010/saebom (D74). Read CLAUDE.md, then review the diff against it and
+  the handoff. Check each finding against the code, keep only the ones you verified, and post them as
+  one PR comment that starts with "**Second review** · Claude Opus 5.5 (max effort, cloud) · head <sha7>".
+  Don't push commits, approve or merge.
+  ```
+
+  The coding session, or a follow-up session, fixes what the review confirms. When Claude's limits run out, fall back to the Gemini review (`node scripts/agents/gemini-review.ts <pr>` on the Mac).
+
+- **Spend stays at zero.** The credit is a free promotion, so it's allowed (D64 stands). Don't use Fable or buy usage credits; ultrareview's three free runs are fine, paid runs aren't.
+
+After Nov 4, the Mac lanes, ticking in each PR and the Gemini review apply again as written (D60, D63, D64, D68).
 
 ## How closely to review
 
@@ -124,8 +148,10 @@ Claude Pro's five-hour and weekly limits are shared with claude.ai, and agent se
 | pstack code delegates              | Sonnet 5.5 (`.claude/rules/pstack-models.md`) | high                               |
 | pstack judgment and reviews        | Opus 5.5                                      | high                               |
 | Gemini, second review and fallback | Gemini 4 Argon                                | high                               |
+| Cloud coding session (D74)         | Opus 5.5                                      | high                               |
+| Cloud second review (D74)          | Opus 5.5                                      | max                                |
 
-Effort never goes below medium (D64), and the guard refuses subagents at `low`. Fable isn't used, because it bills to usage credits on Pro.
+Effort never goes below medium (D64), and the guard refuses subagents at `low`. Fable isn't used, because it bills to usage credits on Pro. Until Nov 4, the cloud second review replaces Gemini's, which stays the fallback (D74).
 
 ## What enforces each rule
 
