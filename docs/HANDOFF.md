@@ -615,17 +615,20 @@ Later sign-ins use email, password and an authenticator code. Face ID only unloc
 - **Lost authenticator:** the owner removes the factor with the admin API, following `docs/emergency-access.md`, and the user enrolls again. Logged.
 - **Auth settings (day 3):** anonymous sign-ins on, manual linking off, TOTP MFA on, minimum password length 12, Before User Created hook on, email code expiry long enough for invites (up to 24 hours).
 
-Before User Created hook (check the exact return shape against Supabase's hook docs on day 3):
+Before User Created hook (`supabase/migrations/20261102034717_invite_only.sql`). The shapes match Supabase's hook docs and the events Auth v2.197.0 sent on the local stack (checked Nov 2): `is_anonymous` is a JSON boolean, the email arrives lowercase, and an anonymous sign-in has an empty email and phone.
 
 ```sql
-create or replace function public.hook_invite_only(event jsonb)
+create function public.hook_invite_only(event jsonb)
 returns jsonb
 language plpgsql
+stable
 set search_path = ''
 as $$
 begin
-  -- demo mode
-  if coalesce((event->'user'->>'is_anonymous')::boolean, false) then
+  -- demo mode: an anonymous sign-in never carries an email or phone
+  if event->'user'->'is_anonymous' = 'true'::jsonb
+    and coalesce(event->'user'->>'email', '') = ''
+    and coalesce(event->'user'->>'phone', '') = '' then
     return '{}'::jsonb;
   end if;
   -- invited by the owner's script
@@ -638,8 +641,10 @@ begin
 end;
 $$;
 
+revoke execute on function public.hook_invite_only(jsonb)
+  from public, anon, authenticated, service_role;
+grant usage on schema public to supabase_auth_admin;
 grant execute on function public.hook_invite_only(jsonb) to supabase_auth_admin;
-revoke execute on function public.hook_invite_only(jsonb) from public, anon, authenticated;
 grant select on public.invites to supabase_auth_admin;
 create policy "auth admin reads invites" on public.invites
   for select to supabase_auth_admin using (true);

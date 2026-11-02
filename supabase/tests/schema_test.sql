@@ -1,5 +1,5 @@
 begin;
-select plan(9);
+select plan(11);
 
 select is(
   (select array_agg(c.relname::text order by c.relname)
@@ -29,12 +29,13 @@ select ok(
   'e1rm_by_week runs with the caller''s RLS'
 );
 
--- Effective privileges, so grants to PUBLIC, column grants and sequences count too.
+-- Effective privileges, so grants to PUBLIC, column grants and sequences count too. Auth's role
+-- (supabase_auth_admin) is pinned here too, because the invite hook reads public.invites as it.
 create temporary view app_privileges as
 select r.role, c.relname::text as relation, p.priv
 from pg_class c
 join pg_namespace n on n.oid = c.relnamespace
-cross join (values ('anon'), ('authenticated')) as r (role)
+cross join (values ('anon'), ('authenticated'), ('supabase_auth_admin')) as r (role)
 cross join (values
   ('SELECT'), ('INSERT'), ('UPDATE'), ('DELETE'), ('TRUNCATE'), ('REFERENCES'), ('TRIGGER'), ('USAGE')
 ) as p (priv)
@@ -85,6 +86,13 @@ select is(
 );
 
 select is(
+  (select array_agg(relation || ':' || priv order by relation, priv)
+   from app_privileges where role = 'supabase_auth_admin'),
+  array['invites:SELECT']::text[],
+  'supabase_auth_admin can only read invites, for the invite hook'
+);
+
+select is(
   (select array_agg(c.relname::text order by c.relname)
    from pg_class c join pg_namespace n on n.oid = c.relnamespace
    where n.nspname = 'public' and c.relkind in ('r', 'v')
@@ -115,6 +123,14 @@ select is(
        or has_function_privilege('authenticated', p.oid, 'execute'))),
   null,
   'app roles can execute no function in public'
+);
+
+select is(
+  (select array_agg(p.oid::regprocedure::text order by p.oid::regprocedure::text)
+   from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+   where n.nspname = 'public' and has_function_privilege('supabase_auth_admin', p.oid, 'execute')),
+  array['public.hook_invite_only(jsonb)'::regprocedure::text],
+  'supabase_auth_admin can execute only the invite hook in public'
 );
 
 select * from finish();
