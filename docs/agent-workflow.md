@@ -1,6 +1,6 @@
 # Running Saebom's AI agents
 
-This guide is for the owner. It explains how AI agents build Saebom from §14 of `docs/HANDOFF.md` while you review and merge. The rules agents follow live in `CLAUDE.md`, and the decisions behind this workflow are D58–D74 in the handoff. Until Nov 4, cloud sessions change parts of it; see [Cloud sessions until Nov 4](#cloud-sessions-until-nov-4-d73d74).
+This guide is for the owner. It explains how AI agents build Saebom from §14 of `docs/HANDOFF.md` while you review and merge. The rules agents follow live in `CLAUDE.md`, and the decisions behind this workflow are D58–D75 in the handoff. Until Nov 4, cloud sessions change parts of it; see [Cloud sessions until Nov 4](#cloud-sessions-until-nov-4-d73d74).
 
 ## How it fits together
 
@@ -58,9 +58,11 @@ The two lanes are the two sessions Claude Pro allows at once (D60), so don't sta
 
 Until the promotional cloud credit runs out or expires (Nov 4), you can run agent tasks as Claude Code cloud sessions alongside, or instead of, the two lanes on the Mac.
 
-- **As many at once as you start.** Give each session one §14 item, or a few items you group, and tell it which lane (`Lane: app` or `Lane: backend`) and review depth the PR carries. It works under the same `CLAUDE.md`, opens one PR and stops.
+- **As many at once as you start.** Give each session one §14 item, or a few items you group, and tell it which lane (`Lane: app` or `Lane: backend`) and review depth the PR carries, and which `<type>/<topic>` branch to push to; otherwise the cloud hands it a `claude/…` branch (D75). It works under the same `CLAUDE.md`, opens one PR and stops.
 - **Cloud PRs don't tick §14.** Each names the items it finishes in its body. Once a day, tick the merged items yourself in one docs PR, or have a session do it.
 - **One PR at a time on the shared spots.** Only one open PR may change the route gate (`app/app/_layout.tsx` or `auth-state.ts`), and only one may add a migration or change `supabase/tests/schema_test.sql` (the DB lane). Don't start a second session on either until the first one's PR is merged or closed.
+- **The cloud starts without Docker, and `gh` can't write there (D75).** Sessions start the Docker engine themselves before database work and use the GitHub connector for PRs, comments and issues; `CLAUDE.md` has the commands. On Nov 1, `npm run verify` passed end to end this way.
+- **Node 22 in the cloud.** The cloud image puts Node 22 first on the PATH, with Node 24 at `/usr/local/bin`. Every check passes on 22. To match CI and the Mac, add `echo 'export PATH=/usr/local/bin:$PATH' >> ~/.bashrc` to the environment's setup script (the cloud environment menu in the session's title bar, then Edit). This hasn't been tested yet.
 - **Checks the cloud can't run come back to the Mac.** Each cloud PR lists them under Verification. Run the Simulator, the iPhone and any other listed check on the Mac before merging.
 - **The second review is a cloud session too (D74).** Start a cloud session on Opus 5.5 at max effort for each PR, for example:
 
@@ -68,7 +70,8 @@ Until the promotional cloud credit runs out or expires (Nov 4), you can run agen
   Second-review PR #<n> in rryan1010/saebom (D74). Read CLAUDE.md, then review the diff against it and
   the handoff. Check each finding against the code, keep only the ones you verified, and post them as
   one PR comment that starts with "**Second review** · Claude Opus 5.5 (max effort, cloud) · head <sha7>".
-  Don't push commits, approve or merge.
+  Post it with the GitHub connector, since gh can't write from the cloud (D75). Don't push commits,
+  approve or merge.
   ```
 
   The coding session, or a follow-up session, fixes what the review confirms. When Claude's limits run out, fall back to the Gemini review (`node scripts/agents/gemini-review.ts <pr>` on the Mac).
@@ -181,6 +184,9 @@ The guard reads command text, so it can't see inside script files or interpreter
 | `gemini-review.ts` exits 2                                                       | The diff looks like it holds a secret; nothing was sent                                              | Take the secret out of the branch, and rotate it if it was ever pushed                                                                           |
 | A worktree has no `.env.local` files                                             | They didn't exist in the main checkout when the worktree was created                                 | Create them in the main checkout (setup step 3), then start a new worktree                                                                       |
 | `/plugin` shows pstack as "enabled in project settings but isn't installed here" | The marketplace hasn't registered yet                                                                | Accept the trust prompt, then run `/reload-plugins`; or run `/plugin marketplace add cursor/plugins` and `/plugin install pstack@cursor-plugins` |
+| `gh` fails with "HTTP 403: GitHub GraphQL is not available" in the cloud         | Cloud sessions block GitHub's GraphQL API, which most `gh pr` and `gh issue` commands use            | Use the GitHub connector for PRs, comments and issues, and `gh api -X GET` calls to list them (D75)                                              |
+| `npx supabase start` in the cloud can't find `/var/run/docker.sock`              | The cloud doesn't start the Docker engine                                                            | Start `dockerd` as a background command and wait for `docker info`; start it again after the 2-hour limit (D75)                                  |
+| `supabase start` says the db container is unhealthy after Docker restarts        | The engine brought the old containers back half-started                                              | Run `npx supabase stop`, then `npx supabase start` (D75)                                                                                         |
 | An agent says the guard blocked a step it needs                                  | The step is yours by design                                                                          | Run it yourself; if the guard is wrong, edit it by hand and open a PR with a test                                                                |
 
 ## Noodle, after Nov 6
