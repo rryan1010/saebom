@@ -650,6 +650,8 @@ create policy "auth admin reads invites" on public.invites
   for select to supabase_auth_admin using (true);
 ```
 
+The hook sees only new users, so it can't stop a demo user from becoming a real account. Checked on the local stack (Nov 2, Auth v2.197.0, manual linking off): with email confirmations off, a demo session's `updateUser({ email })` applied the email at once and cleared `is_anonymous`, and a password and a password sign-in followed, all without the hook running. A trigger on `auth.users`, `keep_demo_users_anonymous`, refuses any update that gives a demo user an email or phone or ends its anonymity, and Auth's whole update rolls back. `npm run test:auth` checks the hook, the trigger and manual linking through the local Auth API.
+
 ### Consent (D14)
 
 - Shown after MFA and before any workout or health information is collected. The full privacy policy (`docs/privacy-policy.md`, bundled in the app and versioned) is one tap away.
@@ -745,7 +747,7 @@ where is_anonymous is true
 | Repudiation            | "I never accepted that change"                                                        | Audit events for every accept, dismissal, consent change and plan version                                                                                |
 | Information disclosure | A lock screen, the AI provider, a lost phone, public CI logs or backups               | Generic notification text; opt-in anonymous summaries; Keychain (this device only) plus the app lock; nothing sensitive printed in CI; encrypted backups |
 | Denial of service      | Demo sign-up spam, a burned AI quota, or cron endpoints called by strangers           | IP rate limit and nightly cleanup; weekly cron and a daily cap; cron functions require a secret key                                                      |
-| Elevation of privilege | Prompt injection, a demo user becoming a real account, or a sign-up without an invite | No user text in prompts, the checker and user approval; manual linking off; the invite hook                                                              |
+| Elevation of privilege | Prompt injection, a demo user becoming a real account, or a sign-up without an invite | No user text in prompts, the checker and user approval; manual linking off; the invite hook and the demo-user trigger                                    |
 
 ### OWASP Mobile Top 10 (2024)
 
@@ -967,7 +969,7 @@ All items are open; build work hadn't started by Oct 28, the date of day 3. Days
 
 - [ ] `select tablename from pg_tables where schemaname = 'public' and not rowsecurity;` returns no rows.
 - [ ] pgTAP: a session that skipped MFA reads nothing; user B sees none of user A's rows; app roles can't insert into training tables or call internal functions.
-- [ ] An email that wasn't invited can't sign up; anonymous sign-in works; manual linking is off.
+- [ ] An email that wasn't invited can't sign up; anonymous sign-in works; manual linking is off; a demo session can't add an email (`npm run test:auth` checks all four on the local stack).
 - [ ] The app's JavaScript bundle contains no secret key or token.
 - [ ] With the Workers AI token revoked, the app still runs and progression still updates.
 - [ ] Reminders fire at the chosen time, skip a day with a recorded workout and stop after sign-out.
@@ -986,7 +988,7 @@ All items are open; build work hadn't started by Oct 28, the date of day 3. Days
 ## 16. Open questions and risks
 
 - **Invite codes without email:** confirm on day 3 that the admin generate-link call returns a usable one-time code without custom SMTP; Supabase's notice about its email changes says generate-link works without it. Fallback: a temporary password the user must change at first sign-in.
-- **The hook and script-created users:** the invite script adds the email to `invites` before creating the user, so the hook passes either way.
+- **The hook and script-created users:** the invite script adds the email to `invites` before creating the user, so the hook passes either way. Checked Nov 2 on the local stack: the admin API's create-user skips the hook, and generate-link for an email with no user runs it.
 - **Keychain size:** a Supabase session can be larger than SecureStore comfortably holds, so the adapter splits it into chunks; test with a real session on day 3. iOS keeps Keychain items after an app is deleted, so clear stale ones on first launch.
 - **Metro and `_shared/`:** spike on day 2; the copy script is the fallback.
 - **Sign-in audit trigger** on Supabase's auth tables: confirm on day 8.
