@@ -16,7 +16,10 @@ void SplashScreen.preventAutoHideAsync();
 configureNotifications();
 
 // Phone-only POC: the plan, sessions and reminders live on the device, and sign-in is parked.
-// The (auth) screens and the Supabase client stay in the tree for when the backend comes back.
+// The sign-in screens wait unchanged in src/parked/(auth): Expo Router loads every file under
+// app/ at startup in development, and they would need Supabase settings the POC doesn't use.
+// To bring them back, move that folder back to app/(auth) and restore the guard that sends
+// signed-out users to /sign-in.
 export default function RootLayout() {
   const { colors } = useTheme();
   const loaded = useWorkoutStateLoaded();
@@ -67,13 +70,6 @@ export default function RootLayout() {
       </Stack.Protected>
       <Stack.Protected guard={!hasPlan} redirectTo="/">
         <Stack.Screen name="onboarding" />
-      </Stack.Protected>
-      <Stack.Protected guard={false} redirectTo="/">
-        <Stack.Screen name="(auth)/sign-in" />
-        <Stack.Screen name="(auth)/invite" />
-        <Stack.Screen name="(auth)/mfa-challenge" />
-        <Stack.Screen name="(auth)/set-password" />
-        <Stack.Screen name="(auth)/mfa-enroll" />
       </Stack.Protected>
     </Stack>
   );
