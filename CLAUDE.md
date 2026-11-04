@@ -1,5 +1,7 @@
 # Saebom (새봄)
 
+**Current direction (Nov 3):** since Nov 2 the app is a phone-only proof of concept of the three goals: the plan, reminders and the timed session (#32). It has no account and no network. Sign-in is parked in `app/src/parked/(auth)`, and the backend in `supabase/` goes unused, though CI still tests it. That's on purpose, not a regression. Until the owner says otherwise, the backend-first parts of this file and the handoff's §14 schedule are paused: do the task the owner names instead of picking from §14, and don't bring back Supabase or sign-in unless asked. The "Never" rules, the safety texts and the plan engine's invariants still hold. `docs/POC.md` says what's parked, how to run the app and how to bring sign-in back.
+
 This is the standing memory for AI agents in this repo. Claude Code loads it at the start of every session, and `AGENTS.md` links to it so Antigravity CLI and other agents load the same rules; `GEMINI.md` adds what differs for Gemini. The full spec lives in `docs/HANDOFF.md`, and on product behavior the handoff wins. Keep both current in the same pull request: a new decision goes in the handoff's §3, a changed command or convention goes here. How the owner runs agents day to day is in `docs/agent-workflow.md`.
 
 Handoff map: §3 decisions · §6 data model and RLS · §7 plan engine · §8 session and look · §9 reminders · §10 AI coach · §11 accounts, consent, demo · §12 security, secrets, backups · §13 iOS build and TestFlight · §14 schedule and progress · §15 checks before inviting testers · §18 public launch.
