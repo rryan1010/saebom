@@ -7,9 +7,10 @@ type Props = {
   label: string;
   onPress: () => void;
   disabled?: boolean;
+  tone?: 'accent' | 'danger';
 };
 
-export function TextButton({ label, onPress, disabled = false }: Props) {
+export function TextButton({ label, onPress, disabled = false, tone = 'accent' }: Props) {
   const { colors } = useTheme();
   return (
     <Pressable
@@ -26,7 +27,9 @@ export function TextButton({ label, onPress, disabled = false }: Props) {
         opacity: disabled ? 0.5 : pressed ? 0.6 : 1,
       })}
     >
-      <Text style={[TYPE.headline, { color: colors.accent }]}>{label}</Text>
+      <Text style={[TYPE.headline, { color: tone === 'danger' ? colors.danger : colors.accent }]}>
+        {label}
+      </Text>
     </Pressable>
   );
 }

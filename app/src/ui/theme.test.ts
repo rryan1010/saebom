@@ -24,6 +24,8 @@ const PAIRS: { fg: ColorRole; bg: ColorRole; min: number }[] = [
   { fg: 'onAccent', bg: 'accent', min: 4.5 },
   { fg: 'accent', bg: 'background', min: 3 },
   { fg: 'accent', bg: 'surface', min: 3 },
+  { fg: 'danger', bg: 'background', min: 4.5 },
+  { fg: 'danger', bg: 'surface', min: 4.5 },
 ];
 
 const SCHEMES: Scheme[] = ['dark', 'light'];

@@ -1,62 +1,76 @@
-import { Stack, type Href } from 'expo-router';
+import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+import { AppState } from 'react-native';
 
-import type { AuthStatus } from '@/lib/auth-state';
-import { AuthProvider, useAuthStatus } from '@/lib/AuthProvider';
+import { configureNotifications, syncReminders } from '@/lib/reminder-scheduler';
+import {
+  getWorkoutState,
+  loadWorkoutState,
+  useWorkoutState,
+  useWorkoutStateLoaded,
+} from '@/lib/workout-store';
 import { useTheme } from '@/ui/useTheme';
 
 void SplashScreen.preventAutoHideAsync();
+configureNotifications();
 
-// Without an explicit target, a guarded route falls back to a screen the router picks, which on a
-// cold start was the invite screen rather than sign-in.
-const LANDING: Record<Exclude<AuthStatus, 'loading'>, Href> = {
-  signedOut: '/sign-in',
-  needsChallenge: '/mfa-challenge',
-  needsPassword: '/set-password',
-  needsEnrollment: '/mfa-enroll',
-  signedIn: '/',
-};
-
-function Navigator() {
+// Phone-only POC: the plan, sessions and reminders live on the device, and sign-in is parked.
+// The sign-in screens wait unchanged in src/parked/(auth): Expo Router loads every file under
+// app/ at startup in development, and they would need Supabase settings the POC doesn't use.
+// To bring them back, move that folder back to app/(auth) and restore the guard that sends
+// signed-out users to /sign-in.
+export default function RootLayout() {
   const { colors } = useTheme();
-  const status = useAuthStatus();
+  const loaded = useWorkoutStateLoaded();
+  const state = useWorkoutState();
 
   useEffect(() => {
-    if (status !== 'loading') void SplashScreen.hideAsync();
-  }, [status]);
+    void loadWorkoutState();
+  }, []);
 
-  if (status === 'loading') return null;
-  const landing = LANDING[status];
+  useEffect(() => {
+    if (loaded) void SplashScreen.hideAsync();
+  }, [loaded]);
+
+  // Reminders depend on the settings, on whether today's workout is recorded, and on the date, so
+  // reschedule when any of those change and whenever the app comes back to the foreground (§9).
+  const reminderInputs = loaded
+    ? JSON.stringify([state.reminders, state.sessions.length, state.active?.id ?? null])
+    : null;
+  useEffect(() => {
+    if (reminderInputs !== null) void syncReminders(getWorkoutState);
+  }, [reminderInputs]);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (appState) => {
+      if (appState === 'active') void syncReminders(getWorkoutState);
+    });
+    return () => subscription.remove();
+  }, []);
+
+  if (!loaded) return null;
+  const hasPlan = state.profile !== null && state.plan !== null;
 
   return (
     <Stack
       screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}
     >
-      <Stack.Protected guard={status === 'signedOut'} redirectTo={landing}>
-        <Stack.Screen name="(auth)/sign-in" />
-        <Stack.Screen name="(auth)/invite" />
+      <Stack.Protected guard={hasPlan} redirectTo="/onboarding">
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen
+          name="session"
+          options={{ presentation: 'fullScreenModal', gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="summary"
+          options={{ presentation: 'fullScreenModal', gestureEnabled: false }}
+        />
+        <Stack.Screen name="profile" options={{ presentation: 'modal' }} />
       </Stack.Protected>
-      <Stack.Protected guard={status === 'needsChallenge'} redirectTo={landing}>
-        <Stack.Screen name="(auth)/mfa-challenge" />
-      </Stack.Protected>
-      <Stack.Protected guard={status === 'needsPassword'} redirectTo={landing}>
-        <Stack.Screen name="(auth)/set-password" />
-      </Stack.Protected>
-      <Stack.Protected guard={status === 'needsEnrollment'} redirectTo={landing}>
-        <Stack.Screen name="(auth)/mfa-enroll" />
-      </Stack.Protected>
-      <Stack.Protected guard={status === 'signedIn'} redirectTo={landing}>
-        <Stack.Screen name="index" />
+      <Stack.Protected guard={!hasPlan} redirectTo="/">
+        <Stack.Screen name="onboarding" />
       </Stack.Protected>
     </Stack>
-  );
-}
-
-export default function RootLayout() {
-  return (
-    <AuthProvider>
-      <Navigator />
-    </AuthProvider>
   );
 }
