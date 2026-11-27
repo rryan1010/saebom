@@ -63,7 +63,7 @@ The app imports `_shared/` through Metro as `@shared/<module>/index.ts` (`watchF
 
 **Edge Functions:** user-facing functions use the auth wrapper in §12 and reject callers that are neither `aal2` nor anonymous. They validate every payload and use the secret key only for writes RLS forbids. `coach-review` accepts only the named `cron` key.
 
-**App:** only `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` ship in the bundle. Every ring and button gets an `accessibilityLabel`, text follows Dynamic Type, and transitions become fades under Reduce Motion. Rings never appear as three nested rings (Apple guideline 5.2.5). UI text is English; 새봄 appears only in the wordmark and icon. Weights are pounds only, named `_lb`. No analytics, ads, location or crash SDKs; add app packages with `npx expo install <package>` from inside `app/`. "Train it light" is never saved until the tester acknowledges its warning (`light_ack_at`); the warning text lives in handoff §11 and isn't shortened or softened. No doctor's note or clearance is asked for anywhere, and no screen blocks the plan for lack of one (D49). Comfort check-in answers stay on the phone; only the choice to go lighter is sent (D50).
+**App:** only `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` ship in the bundle. Every ring and button gets an `accessibilityLabel`, text follows Dynamic Type, and transitions become fades under Reduce Motion. Rings never appear as three nested rings (Apple guideline 5.2.5). UI text is English; 새봄 appears only in the wordmark (the icon carries the blossom mark, D78). The logo's master copy is `app/assets/brand/saebom-mark.svg`: draw it in the app with `SaebomMark`, and after changing it or the theme's accent or background, rerun `npm run brand:export` to rewrite the icon and splash images. Weights are pounds only, named `_lb`. No analytics, ads, location or crash SDKs; add app packages with `npx expo install <package>` from inside `app/`. "Train it light" is never saved until the tester acknowledges its warning (`light_ack_at`); the warning text lives in handoff §11 and isn't shortened or softened. No doctor's note or clearance is asked for anywhere, and no screen blocks the plan for lack of one (D49). Comfort check-in answers stay on the phone; only the choice to go lighter is sent (D50).
 
 **AI coach:** the model's output is untrusted input, and the checker is the security boundary. Prompts carry only the anonymous summary: no user text, IDs, names, emails, dates or injured areas. Light exercises (D47) stay out of the summary, and the checker rejects any change that names one.
 
@@ -100,6 +100,7 @@ npx supabase functions serve --env-file supabase/functions/.env.local
 npm --prefix app run ios               # expo run:ios: dev build in the iOS Simulator
 npm --prefix app run ios:device        # expo run:ios --device: dev build on the iPhone
 npm --prefix app start                 # expo start: Metro for an installed dev build
+npm run brand:export                   # node scripts/export-brand.ts: icon.png and splash-icon.png from the logo's master SVG and the theme (D78)
 ```
 
 Fix the native project (see the handoff's §13 troubleshooting table):
