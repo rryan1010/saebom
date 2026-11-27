@@ -2,15 +2,16 @@ export type Scheme = 'dark' | 'light';
 export type ColorRole =
   'background' | 'surface' | 'text' | 'textSecondary' | 'accent' | 'onAccent' | 'border' | 'danger';
 
-// accent and onAccent are defaults until the owner answers #7
+// The accent is electric violet (D77). The app icon and splash are exported from these colors:
+// rerun `npm run brand:export` after changing accent or background (D78).
 export const COLORS = {
   dark: {
     background: '#0B0D0C',
     surface: '#1A1D1B',
     text: '#F5F7F5',
     textSecondary: '#A3ABA6',
-    accent: '#3DDC84',
-    onAccent: '#06140C',
+    accent: '#9B5CFF',
+    onAccent: '#0B0614',
     border: '#2C322E',
     danger: '#FF8A80',
   },
@@ -19,7 +20,7 @@ export const COLORS = {
     surface: '#F1F3F1',
     text: '#0B0D0C',
     textSecondary: '#4F5752',
-    accent: '#0F7A3D',
+    accent: '#7438E0',
     onAccent: '#FFFFFF',
     border: '#D5DBD7',
     danger: '#B3261E',
